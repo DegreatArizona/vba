@@ -16,8 +16,9 @@ The API lives alongside the existing Django website under `/api/v1/` and uses th
 
 - `GET /api/v1/me/` — returns only the authenticated Django user identity and mobile role state; bank details, account numbers, mobile numbers, and uploaded documents are not included.
 - `GET /api/v1/requests/` — paginated (20 per page), read-only request data. Drivers see requests linked to their profile; mechanics see only requests assigned to their profile; managers see only requests whose manager field is their profile. Email must be verified, and mechanics/managers must be approved to read requests.
+- `GET /api/v1/requests/{id}/` — returns the same allowlisted DTO for one request, using the same role, verification, and approval scope. Requests outside the caller's scope return 404.
 
-The request DTO is explicitly allowlisted and excludes transaction references, invoice status, payment credentials, and unrelated profile records. No request creation, mutation, assignment, location update, wallet, payment, subscription, notification, or withdrawal API is included in this phase.
+The request DTO is explicitly allowlisted and excludes transaction references, invoice status, payment credentials, and unrelated profile records. No request creation, mutation, assignment, location update, wallet, payment, subscription, notification, or withdrawal API is included in this phase. Request detail is read-only; the app does not infer historical event timestamps from the current status.
 
 ## Deployment notes
 

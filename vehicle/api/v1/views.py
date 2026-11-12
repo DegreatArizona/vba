@@ -63,9 +63,9 @@ class MobileProfileView(APIView):
         return Response(MobileUserSerializer(request.user).data)
 
 
-class MobileRequestListView(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+class MobileRequestScopeMixin:
     serializer_class = RequestReadSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         role, profile = get_mobile_profile(self.request.user)
@@ -83,3 +83,11 @@ class MobileRequestListView(generics.ListAPIView):
         if role == "mechanic":
             return requests.filter(mechanic=profile)
         return requests.filter(manager=profile)
+
+
+class MobileRequestListView(MobileRequestScopeMixin, generics.ListAPIView):
+    pass
+
+
+class MobileRequestDetailView(MobileRequestScopeMixin, generics.RetrieveAPIView):
+    lookup_field = "pk"

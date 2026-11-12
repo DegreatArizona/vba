@@ -1,5 +1,5 @@
 import { clearStoredTokens, readStoredTokens, writeStoredTokens } from "./token-storage";
-import type { LoginResponse, MobileUser, RequestPage, TokenPair } from "./types";
+import type { LoginResponse, MobileUser, RequestPage, ServiceRequest, TokenPair } from "./types";
 
 const configuredOrigin = (process.env.EXPO_PUBLIC_API_BASE_URL ?? "").trim().replace(/\/+$/, "");
 
@@ -185,6 +185,10 @@ export function getCurrentUser(): Promise<MobileUser> {
 
 export function getRequestPage(path: string): Promise<RequestPage> {
   return performRequest<RequestPage>(path, {}, true, true);
+}
+
+export function getRequest(requestId: number): Promise<ServiceRequest> {
+  return performRequest<ServiceRequest>(`/api/v1/requests/${requestId}/`, {}, true, true);
 }
 
 async function sendLogout(tokens: TokenPair): Promise<Response> {

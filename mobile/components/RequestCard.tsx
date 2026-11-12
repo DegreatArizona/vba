@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "../lib/theme";
 import type { ServiceRequest } from "../lib/types";
 
 interface RequestCardProps {
+  onPress: () => void;
   request: ServiceRequest;
 }
 
@@ -24,14 +25,20 @@ function statusPalette(status: string) {
   return { background: colors.amberSoft, foreground: "#805311" };
 }
 
-export function RequestCard({ request }: RequestCardProps) {
+export function RequestCard({ onPress, request }: RequestCardProps) {
   const status = request.status?.replace(/[_-]/g, " ").trim() || "Status unavailable";
   const palette = statusPalette(status);
   const vehicle = [request.vehicle_name, request.vehicle_no].filter(Boolean).join(" · ");
   const place = [request.location, request.state].filter(Boolean).join(", ");
 
   return (
-    <View style={styles.card}>
+    <Pressable
+      accessibilityHint="Opens details for this service request."
+      accessibilityLabel={`Request ${request.id}: ${request.category}, status ${status}. View details.`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+    >
       <View style={styles.topLine}>
         <Text style={styles.category}>{request.category || "Vehicle assistance"}</Text>
         <View style={[styles.status, { backgroundColor: palette.background }]}>
@@ -50,7 +57,7 @@ export function RequestCard({ request }: RequestCardProps) {
         <Text style={styles.footerLabel}>Submitted</Text>
         <Text style={styles.footerValue}>{formatDate(request.date)}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -62,6 +69,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.line,
+  },
+  cardPressed: {
+    borderColor: colors.teal,
+    opacity: 0.9,
   },
   topLine: {
     flexDirection: "row",

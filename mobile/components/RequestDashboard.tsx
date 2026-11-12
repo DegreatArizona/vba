@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useRouter } from "expo-router";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import useSWRInfinite from "swr/infinite";
 
@@ -27,6 +28,7 @@ const roleCopy: Record<UserRole, { title: string; description: string }> = {
 };
 
 export function RequestDashboard() {
+  const router = useRouter();
   const { user } = useAuth();
   const canReadRequests = Boolean(
     user?.is_email_verified && (user.role === "driver" || user.is_approved),
@@ -141,7 +143,13 @@ export function RequestDashboard() {
           </View>
         ) : requests.length ? (
           <View style={styles.requestList}>
-            {requests.map((request) => <RequestCard key={request.id} request={request} />)}
+            {requests.map((request) => (
+              <RequestCard
+                key={request.id}
+                onPress={() => router.push({ pathname: "/(app)/request-details", params: { requestId: String(request.id) } })}
+                request={request}
+              />
+            ))}
             {lastPage?.next ? (
               <PrimaryButton
                 disabled={isValidating}

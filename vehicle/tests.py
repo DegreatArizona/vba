@@ -83,6 +83,10 @@ class MobileApiTests(TestCase):
     def test_private_endpoints_require_authentication(self):
         self.assertEqual(self.client.get("/api/v1/me/").status_code, 401)
         self.assertEqual(self.client.get("/api/v1/requests/").status_code, 401)
+        self.assertEqual(
+            self.client.get(f"/api/v1/requests/{self.driver_request.pk}/").status_code,
+            401,
+        )
 
     def test_login_returns_role_and_short_lived_token_pair(self):
         response = self.client.post(
@@ -139,6 +143,43 @@ class MobileApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual([row["id"] for row in response.data["results"]], [self.driver_request.pk])
+
+    def test_driver_can_retrieve_own_request(self):
+        self.authenticate_as(self.driver_user)
+        response = self.client.get(f"/api/v1/requests/{self.driver_request.pk}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["id"], self.driver_request.pk)
+
+    def test_driver_cannot_retrieve_another_drivers_request(self):
+        self.authenticate_as(self.driver_user)
+        response = self.client.get(f"/api/v1/requests/{self.other_driver_request.pk}/")
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_mechanic_and_manager_can_retrieve_only_assigned_requests(self):
+        self.authenticate_as(self.mechanic_user)
+        allowed = self.client.get(f"/api/v1/requests/{self.driver_request.pk}/")
+        denied = self.client.get(f"/api/v1/requests/{self.other_driver_request.pk}/")
+        self.assertEqual(allowed.status_code, 200)
+        self.assertEqual(denied.status_code, 404)
+
+        self.authenticate_as(self.manager_user)
+        allowed = self.client.get(f"/api/v1/requests/{self.driver_request.pk}/")
+        denied = self.client.get(f"/api/v1/requests/{self.other_driver_request.pk}/")
+        self.assertEqual(allowed.status_code, 200)
+        self.assertEqual(denied.status_code, 404)
+
+    def test_unverified_driver_cannot_retrieve_request_details(self):
+        unverified_user = User.objects.create_user(
+            username="unverified-detail-driver", password="StrongPassword123!"
+        )
+        Driver.objects.create(user=unverified_user, is_email_verified=False)
+        self.authenticate_as(unverified_user)
+
+        response = self.client.get(f"/api/v1/requests/{self.driver_request.pk}/")
+
+        self.assertEqual(response.status_code, 403)
 
     def test_refresh_rotates_and_logout_blacklists_refresh_token(self):
         login = self.client.post(
@@ -204,6 +245,12 @@ class MobileApiTests(TestCase):
         request_create = self.client.post(
             "/api/v1/requests/", {"category": "Tire Repair"}, format="json"
         )
+        request_update = self.client.patch(
+            f"/api/v1/requests/{self.driver_request.pk}/",
+            {"status": "Done"},
+            format="json",
+        )
 
         self.assertEqual(profile_update.status_code, 405)
         self.assertEqual(request_create.status_code, 405)
+        self.assertEqual(request_update.status_code, 405)

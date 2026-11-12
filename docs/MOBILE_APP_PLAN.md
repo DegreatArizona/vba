@@ -1,6 +1,6 @@
 # Mobile App Plan
 
-**Status:** The first native client slice is implemented in `mobile/` using Expo Router. It supports username/password sign-in, role-aware request lists and profile views for Driver, Mechanic, and Manager, plus secure native token storage, refresh/logout, and approval, verification, loading, empty, and error states. It consumes only the existing read/auth API; request creation, payments, location, and other write flows remain out of scope until their backend contracts are ready. The client is native-first and does not wrap the website in a WebView.
+**Status:** The native client in `mobile/` uses Expo Router for username/password sign-in, role-aware request lists, read-only request details, and profile views for Driver, Mechanic, and Manager. Native tokens use SecureStore with refresh/logout; the app includes approval, verification, loading, empty, and error states. Request creation, payments, location, and other write flows remain out of scope until their backend contracts are ready. The client is native-first and does not wrap the website in a WebView.
 
 ## Current first slice
 

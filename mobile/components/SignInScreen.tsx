@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 
@@ -19,6 +20,8 @@ import { colors } from "../lib/theme";
 
 export function SignInScreen() {
   const router = useRouter();
+  const { height } = useWindowDimensions();
+  const compact = height < 700;
   const { signIn } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -44,40 +47,53 @@ export function SignInScreen() {
   }
 
   return (
-    <ScreenFrame contentStyle={styles.content}>
+    <ScreenFrame contentStyle={compact ? styles.contentCompact : styles.content}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <View style={styles.hero}>
+        <View style={[styles.hero, compact && styles.heroCompact]}>
           <View style={styles.brandRow}>
-            <BrandMark size={50} />
+            <BrandMark size={compact ? 42 : 50} />
             <View>
               <Text style={styles.brandName}>Auto Aid</Text>
               <Text style={styles.brandCaption}>ROADSIDE SUPPORT</Text>
             </View>
           </View>
-          <Text style={styles.heroTitle}>Steady support, wherever the road takes you.</Text>
-          <Text style={styles.heroBody}>Sign in to stay close to your service requests.</Text>
-          <View style={styles.routeMark}>
-            <View style={styles.routeLine} />
-            <View style={styles.routeDot} />
-            <View style={styles.routeDotEnd} />
-          </View>
+          <Text style={[styles.heroTitle, compact && styles.heroTitleCompact]}>
+            Steady support, wherever the road takes you.
+          </Text>
+          <Text style={[styles.heroBody, compact && styles.heroBodyCompact]}>
+            Sign in to stay close to your service requests.
+          </Text>
+          {!compact ? (
+            <View style={styles.routeMark}>
+              <View style={styles.routeLine} />
+              <View style={styles.routeDot} />
+              <View style={styles.routeDotEnd} />
+            </View>
+          ) : null}
         </View>
 
-        <View style={styles.formCard}>
-          <View style={styles.formHeading}>
+        <View style={[styles.formCard, compact && styles.formCardCompact]}>
+          <View style={[styles.formHeading, compact && styles.formHeadingCompact]}>
             <Text style={styles.eyebrow}>WELCOME BACK</Text>
-            <Text style={styles.title}>Sign in to your account</Text>
-            <Text style={styles.subtitle}>Use the username and password for your Auto Aid account.</Text>
+            <Text style={[styles.title, compact && styles.titleCompact]}>Sign in to your account</Text>
+            <Text style={[styles.subtitle, compact && styles.subtitleCompact]}>
+              Use the username and password for your Auto Aid account.
+            </Text>
           </View>
 
           {configurationIssue ? (
-            <View accessibilityRole="alert" style={styles.configurationNotice}>
+            <View
+              accessibilityRole="alert"
+              style={[styles.configurationNotice, compact && styles.configurationNoticeCompact]}
+            >
               <Text style={styles.noticeTitle}>API connection needed</Text>
-              <Text style={styles.noticeText}>{configurationIssue}</Text>
+              <Text style={[styles.noticeText, compact && styles.noticeTextCompact]}>
+                {configurationIssue}
+              </Text>
             </View>
           ) : null}
 
-          <View style={styles.fieldGroup}>
+          <View style={[styles.fieldGroup, compact && styles.fieldGroupCompact]}>
             <Text style={styles.label}>Username</Text>
             <TextInput
               accessibilityLabel="Username"
@@ -88,13 +104,13 @@ export function SignInScreen() {
               placeholder="Enter your username"
               placeholderTextColor={colors.muted}
               returnKeyType="next"
-              style={styles.input}
+              style={[styles.input, compact && styles.inputCompact]}
               textContentType="username"
               value={username}
             />
           </View>
 
-          <View style={styles.fieldGroup}>
+          <View style={[styles.fieldGroup, compact && styles.fieldGroupCompact]}>
             <Text style={styles.label}>Password</Text>
             <View style={styles.passwordWrap}>
               <TextInput
@@ -105,7 +121,7 @@ export function SignInScreen() {
                 placeholder="Enter your password"
                 placeholderTextColor={colors.muted}
                 secureTextEntry={!passwordVisible}
-                style={[styles.input, styles.passwordInput]}
+                style={[styles.input, styles.passwordInput, compact && styles.inputCompact]}
                 textContentType="password"
                 value={password}
               />
@@ -131,10 +147,10 @@ export function SignInScreen() {
             label="Sign in"
             loading={submitting}
             onPress={() => void handleSignIn()}
-            style={styles.submit}
+            style={compact ? styles.submitCompact : styles.submit}
           />
 
-          <Text style={styles.footerNote}>
+          <Text style={[styles.footerNote, compact && styles.footerNoteCompact]}>
             Account registration is managed by Auto Aid. New service requests will be available when the API supports them.
           </Text>
         </View>
@@ -317,5 +333,70 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     textAlign: "center",
+  },
+  contentCompact: {
+    justifyContent: "flex-start",
+    paddingVertical: 8,
+  },
+  heroCompact: {
+    minHeight: 0,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    padding: 18,
+  },
+  heroTitleCompact: {
+    maxWidth: 560,
+    marginTop: 14,
+    fontSize: 27,
+    lineHeight: 32,
+  },
+  heroBodyCompact: {
+    marginTop: 5,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  formCardCompact: {
+    padding: 16,
+    borderBottomLeftRadius: 22,
+    borderBottomRightRadius: 22,
+    gap: 11,
+  },
+  formHeadingCompact: {
+    gap: 4,
+  },
+  titleCompact: {
+    fontSize: 20,
+    lineHeight: 25,
+  },
+  subtitleCompact: {
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  configurationNoticeCompact: {
+    gap: 3,
+    padding: 10,
+  },
+  noticeTextCompact: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  fieldGroupCompact: {
+    gap: 5,
+  },
+  inputCompact: {
+    minHeight: 44,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 14,
+  },
+  submitCompact: {
+    marginTop: 0,
+    minHeight: 46,
+    borderRadius: 14,
+    paddingVertical: 8,
+  },
+  footerNoteCompact: {
+    fontSize: 11,
+    lineHeight: 15,
   },
 });

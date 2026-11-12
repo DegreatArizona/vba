@@ -9,7 +9,7 @@ export default function AppTabsLayout() {
   const { user, isLoading, sessionError } = useAuth();
 
   if (isLoading) return <LoadingScreen />;
-  if (!user || sessionError) return <Redirect href="/" />;
+  if (!user || sessionError) return <Redirect href="/sign-in" />;
 
   return (
     <Tabs
@@ -41,6 +41,10 @@ export default function AppTabsLayout() {
             />
           ),
         }}
+      />
+      <Tabs.Screen
+        name="request-details"
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="profile"

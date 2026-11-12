@@ -4,6 +4,7 @@ from .views import (
     MobileLoginView,
     MobileLogoutView,
     MobileProfileView,
+    MobileRequestDetailView,
     MobileRequestListView,
     MobileTokenRefreshView,
 )
@@ -16,4 +17,5 @@ urlpatterns = [
     path("auth/logout/", MobileLogoutView.as_view(), name="logout"),
     path("me/", MobileProfileView.as_view(), name="me"),
     path("requests/", MobileRequestListView.as_view(), name="requests"),
+    path("requests/<int:pk>/", MobileRequestDetailView.as_view(), name="request-detail"),
 ]
