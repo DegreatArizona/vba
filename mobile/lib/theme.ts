@@ -1,0 +1,15 @@
+export const colors = {
+  ink: "#18303C",
+  inkSoft: "#294653",
+  canvas: "#F5F4EF",
+  paper: "#FFFFFF",
+  line: "#E1E5E3",
+  muted: "#66757B",
+  amber: "#E7A03B",
+  amberSoft: "#FFF3DD",
+  teal: "#2E7D71",
+  tealSoft: "#E8F3EF",
+  red: "#A84D43",
+  redSoft: "#F9ECE9",
+  white: "#FFFFFF",
+} as const;
