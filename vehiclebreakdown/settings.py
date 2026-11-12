@@ -106,6 +106,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
     'vehicle',
     'widget_tweaks',
@@ -115,10 +116,11 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
+  'DEFAULT_AUTHENTICATION_CLASSES': [
+  'rest_framework_simplejwt.authentication.JWTAuthentication',
+  ],
+  'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+  'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -127,12 +129,27 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '60/hour',
-        'user': '120/minute',
-        'auth_login': '5/minute',
-        'auth_refresh': '20/minute',
-    },
+  'DEFAULT_THROTTLE_RATES': {
+  'anon': '60/hour',
+  'user': '120/minute',
+  'auth_login': '5/minute',
+  'auth_refresh': '20/minute',
+  },
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Vehicle Breakdown Mobile API",
+    "DESCRIPTION": "Versioned API endpoints for native mobile clients.",
+    "VERSION": "1.0.0",
+    "SERVE_URLCONF": "vehicle.api.v1.urls",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PUBLIC": True,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    "SERVE_AUTHENTICATION": [],
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SERVERS": [
+        {"url": "/api/v1", "description": "Mobile API v1"},
+    ],
 }
 
 SIMPLE_JWT = {

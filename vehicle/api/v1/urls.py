@@ -1,4 +1,5 @@
 from django.urls import path
+from drf_spectacular.views import SpectacularAPIView
 
 from .views import (
     MobileLoginView,
@@ -13,6 +14,7 @@ from .views import (
 app_name = "mobile_api_v1"
 
 urlpatterns = [
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("auth/login/", MobileLoginView.as_view(), name="login"),
     path("auth/refresh/", MobileTokenRefreshView.as_view(), name="refresh"),
     path("auth/logout/", MobileLogoutView.as_view(), name="logout"),

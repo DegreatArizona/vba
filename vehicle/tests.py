@@ -363,3 +363,37 @@ class MobileApiTests(TestCase):
         self.assertEqual(profile_update.status_code, 405)
         self.assertEqual(request_create.status_code, 405)
         self.assertEqual(request_update.status_code, 405)
+
+    def test_public_schema_is_limited_to_mobile_v1_paths(self):
+        response = self.client.get("/api/v1/schema/")
+
+        self.assertEqual(response.status_code, 200)
+        schema = response.data
+        self.assertEqual(schema["info"]["version"], "1.0.0")
+        self.assertIn({"url": "/api/v1", "description": "Mobile API v1"}, schema["servers"])
+
+        paths = {path.rstrip("/") for path in schema["paths"]}
+        for path in (
+            "/auth/login",
+            "/auth/refresh",
+            "/auth/logout",
+            "/me",
+            "/requests",
+            "/notifications",
+        ):
+            self.assertIn(path, paths)
+
+        self.assertTrue(any(path.startswith("/requests/{") for path in paths))
+        login_response = schema["paths"]["/auth/login/"]["post"]["responses"]["200"]
+        self.assertIn("application/json", login_response["content"])
+        self.assertIn(
+            "user",
+            schema["components"]["schemas"]["MobileTokenResponse"]["properties"],
+        )
+        self.assertEqual(
+            schema["components"]["schemas"]["MobileUser"]["properties"]["is_email_verified"]["type"],
+            "boolean",
+        )
+        self.assertNotIn("/schema", paths)
+        self.assertFalse(any(path.startswith("/admin") for path in paths))
+        self.assertFalse(any(path.startswith("/accounts") for path in paths))

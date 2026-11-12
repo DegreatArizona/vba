@@ -1,5 +1,6 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -16,13 +17,18 @@ from vehicle.models import (
     Request,
 )
 from .serializers import (
+    MobileLogoutSerializer,
     MobileTokenObtainPairSerializer,
+    MobileTokenResponseSerializer,
     MobileUserSerializer,
     NotificationReadSerializer,
     RequestReadSerializer,
     get_mobile_profile,
 )
 
+@extend_schema_view(
+    post=extend_schema(responses=MobileTokenResponseSerializer),
+)
 class MobileLoginView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
     throttle_classes = (ScopedRateThrottle,)
@@ -39,6 +45,7 @@ class MobileTokenRefreshView(TokenRefreshView):
 class MobileLogoutView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    @extend_schema(request=MobileLogoutSerializer, responses={204: None})
     def post(self, request):
         refresh_token = request.data.get("refresh")
         if not isinstance(refresh_token, str) or not refresh_token:
@@ -67,6 +74,7 @@ class MobileLogoutView(APIView):
 class MobileProfileView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    @extend_schema(responses=MobileUserSerializer)
     def get(self, request):
         return Response(MobileUserSerializer(request.user).data)
 

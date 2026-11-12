@@ -1,6 +1,6 @@
 # Mobile API Plan
 
-**Status:** The initial Django API and Expo client foundation are implemented on feature branches. The API provides JWT login/refresh/logout, current-user profile, and paginated role-scoped request reads; the client in `mobile/` provides sign-in, account, and request-list screens. The remaining endpoint matrix is still a proposal. Reuse existing Django models and domain rules; do not create a second database or reimplement request/payment rules in React Native.
+**Status:** The initial Django API and Expo client foundation are implemented on feature branches. The API provides JWT login/refresh/logout, current-user profile, and paginated role-scoped request and notification reads; the client in `mobile/` provides sign-in, account, request-list, and notification screens. The public OpenAPI 3 schema is available at `GET /api/v1/schema/`, scoped to the mobile v1 routes. The remaining endpoint matrix is still a proposal. Reuse existing Django models and domain rules; do not create a second database or reimplement request/payment rules in React Native.
 
 ## Recommended approach
 

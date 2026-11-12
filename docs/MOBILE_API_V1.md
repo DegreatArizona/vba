@@ -27,6 +27,12 @@ The request DTO is explicitly allowlisted and excludes transaction references, i
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` are now read from environment variables. Replace the previously source-controlled Cloudinary credentials with newly rotated values before relying on uploads; empty defaults allow non-media API routes to start but do not enable uploads.
 - Existing Django/database/provider environment variables are still required by project settings; deployment readiness was not established by this code change.
 
+## Schema and compatibility
+
+- `GET /api/v1/schema/` serves the public OpenAPI 3.0.3 contract. It is scoped to the mobile v1 URL configuration and uses `/api/v1` as its server base, so website routes are not included.
+- The schema endpoint contains route and type information only; it does not expose user data. The contract documents the login token pair and boolean profile verification/approval fields explicitly. Protected API operations continue to enforce their own authentication and role-scoping rules.
+- Keep v1 changes backward-compatible and additive. Put breaking path, field, or behavior changes in a new major API prefix, and communicate a deprecation window before retiring an older version.
+
 ## Known follow-up
 
-Add an OpenAPI schema and deployed-environment API checks. Registration, password reset, write actions, and financial flows remain unimplemented. If the app is exported for web and hosted on a different origin, configure a narrow CORS allowlist rather than enabling wildcard origins. Before exposing write or financial actions, reconcile migration/model state and add atomic transition, ownership, webhook idempotency, and ledger tests as laid out in `API_PLAN.md` and `MIGRATION_PLAN.md`.
+Deployed-environment API checks still need a configured target URL and valid environment. Registration, password reset, write actions, and financial flows remain unimplemented. If the app is exported for web and hosted on a different origin, configure a narrow CORS allowlist rather than enabling wildcard origins. Before exposing write or financial actions, reconcile migration/model state and add atomic transition, ownership, webhook idempotency, and ledger tests as laid out in `API_PLAN.md` and `MIGRATION_PLAN.md`.

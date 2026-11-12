@@ -46,17 +46,27 @@ class MobileUserSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
-    def get_role(self, user):
+    def get_role(self, user) -> str:
         role, _ = get_mobile_profile(user)
         return role
 
-    def get_is_email_verified(self, user):
+    def get_is_email_verified(self, user) -> bool:
         _, profile = get_mobile_profile(user)
         return profile.is_email_verified
 
-    def get_is_approved(self, user):
+    def get_is_approved(self, user) -> bool:
         role, profile = get_mobile_profile(user)
         return role == "driver" or profile.status
+
+
+class MobileTokenResponseSerializer(serializers.Serializer):
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True)
+    user = MobileUserSerializer(read_only=True)
+
+
+class MobileLogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
 
 
 class MobileTokenObtainPairSerializer(TokenObtainPairSerializer):
