@@ -42,9 +42,19 @@ export default function AppTabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="request-details" options={{ href: null }} />
       <Tabs.Screen
-        name="request-details"
-        options={{ href: null }}
+        name="notifications"
+        options={{
+          title: "Inbox",
+          tabBarAccessibilityLabel: "Notifications",
+          tabBarIcon: ({ color }) => (
+            <SymbolView
+              name={{ ios: "bell", android: "notifications", web: "notifications" }}
+              tintColor={color}
+            />
+          ),
+        }}
       />
       <Tabs.Screen
         name="profile"

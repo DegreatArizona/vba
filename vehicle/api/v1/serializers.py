@@ -90,3 +90,10 @@ class RequestReadSerializer(serializers.ModelSerializer):
             "tax",
         )
         read_only_fields = fields
+
+
+class NotificationReadSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    message = serializers.CharField(read_only=True)
+    timestamp = serializers.DateTimeField(read_only=True)
+    is_read = serializers.BooleanField(read_only=True)

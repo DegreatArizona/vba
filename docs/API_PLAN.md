@@ -23,7 +23,7 @@ Use serializers with explicit allowlists, request validation, pagination, consis
 | Wallet/history | `GET /api/v1/driver/wallet`, `GET /api/v1/transactions` | Read-only client APIs first. Never accept a client assertion that a payment succeeded or a client-provided balance. Amount/currency are server-derived. |
 | Payment initiation | `POST /api/v1/requests/{id}/checkout`, `POST /api/v1/wallet/topups` | Server creates provider session/reference; validate amount/ownership and use idempotency. Provider webhook remains authoritative. Do not port sandbox credit endpoint into production mobile API. |
 | Withdrawals | `POST /api/v1/withdrawals`; `GET /api/v1/withdrawals` | Validate available funds, bank ownership/verification, positive amount and aggregate limits; reserve funds atomically, use idempotency and reconcile asynchronous result. |
-| Notifications | `GET /api/v1/notifications`, `POST /.../{id}/read`, device-token register/unregister | Scope per role/user; push token is user-bound, revocable and never trusted to grant access. |
+| Notifications | `GET /api/v1/notifications/` (implemented, read-only history); mark-read and device-token registration deferred | Scope each role to its own profile. Future push tokens must be user-bound, revocable and never trusted to grant access. |
 | Feedback/ratings | `POST /api/v1/feedback` / rating resource only after defining target, scale and ownership | Current Feedback is unlinked free-form text; current `rating` fields lack verified calculation. Define semantics before API/schema work. |
 | Subscriptions | `GET /api/v1/subscription`; `POST /api/v1/subscription/checkout` | Only if current Pro plans are confirmed; expiry and entitlements must be server-enforced and transaction-verified. |
 
@@ -42,6 +42,6 @@ Before adding any mobile payment surface: verify the exact Korapay signature rec
 3. Introduce DRF, API schema/versioning, auth, serializers, permissions, throttling and test fixtures.
 4. Deliver read-only profile/request/history APIs by role.
 5. Add validated request actions and location update/read.
-6. Add notification registration and history.
+6. Deliver role-scoped, read-only notification history; defer mark-read and device-token registration until ownership and event lifecycle are designed.
 7. Add payments, wallet, withdrawals and subscription APIs only after ledger/idempotency/provider verification.
 8. Run website regression suite and API authorization matrix before mobile integration.

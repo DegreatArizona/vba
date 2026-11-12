@@ -46,3 +46,17 @@ export interface RequestPage {
   previous: string | null;
   results: ServiceRequest[];
 }
+
+export interface MobileNotification {
+  id: number;
+  message: string;
+  timestamp: string;
+  is_read: boolean;
+}
+
+export interface NotificationPage {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: MobileNotification[];
+}

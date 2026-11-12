@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -7,10 +9,16 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from vehicle.models import Request
+from vehicle.models import (
+    DriverNotification,
+    ManagerNotification,
+    MechanicNotification,
+    Request,
+)
 from .serializers import (
     MobileTokenObtainPairSerializer,
     MobileUserSerializer,
+    NotificationReadSerializer,
     RequestReadSerializer,
     get_mobile_profile,
 )
@@ -61,6 +69,22 @@ class MobileProfileView(APIView):
 
     def get(self, request):
         return Response(MobileUserSerializer(request.user).data)
+
+
+@method_decorator(never_cache, name="dispatch")
+class MobileNotificationListView(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = NotificationReadSerializer
+
+    def get_queryset(self):
+        role, profile = get_mobile_profile(self.request.user)
+        if role == "driver":
+            notifications = DriverNotification.objects.filter(driver=profile)
+        elif role == "mechanic":
+            notifications = MechanicNotification.objects.filter(mechanic=profile)
+        else:
+            notifications = ManagerNotification.objects.filter(manager=profile)
+        return notifications.order_by("-timestamp", "-pk")
 
 
 class MobileRequestScopeMixin:

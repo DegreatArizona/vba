@@ -3,7 +3,15 @@ from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from vehicle.models import Driver, Manager, Mechanic, Request
+from vehicle.models import (
+    Driver,
+    DriverNotification,
+    Manager,
+    ManagerNotification,
+    Mechanic,
+    MechanicNotification,
+    Request,
+)
 
 
 @override_settings(ALLOWED_HOSTS=["testserver"])
@@ -83,6 +91,7 @@ class MobileApiTests(TestCase):
     def test_private_endpoints_require_authentication(self):
         self.assertEqual(self.client.get("/api/v1/me/").status_code, 401)
         self.assertEqual(self.client.get("/api/v1/requests/").status_code, 401)
+        self.assertEqual(self.client.get("/api/v1/notifications/").status_code, 401)
         self.assertEqual(
             self.client.get(f"/api/v1/requests/{self.driver_request.pk}/").status_code,
             401,
@@ -143,6 +152,106 @@ class MobileApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual([row["id"] for row in response.data["results"]], [self.driver_request.pk])
+
+    def test_driver_notifications_are_profile_scoped(self):
+        own = DriverNotification.objects.create(driver=self.driver, message="Driver update")
+        DriverNotification.objects.create(driver=self.other_driver, message="Private update")
+        self.authenticate_as(self.driver_user)
+
+        response = self.client.get("/api/v1/notifications/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no-store", response["Cache-Control"])
+        self.assertEqual([row["id"] for row in response.data["results"]], [own.pk])
+        self.assertEqual(
+            set(response.data["results"][0]),
+            {"id", "message", "timestamp", "is_read"},
+        )
+        self.assertFalse(response.data["results"][0]["is_read"])
+        own.refresh_from_db()
+        self.assertFalse(own.is_read)
+
+    def test_mechanic_notifications_are_profile_scoped(self):
+        own = MechanicNotification.objects.create(mechanic=self.mechanic, message="Job update")
+        MechanicNotification.objects.create(mechanic=self.other_mechanic, message="Private job update")
+        self.authenticate_as(self.mechanic_user)
+
+        response = self.client.get("/api/v1/notifications/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([row["id"] for row in response.data["results"]], [own.pk])
+
+    def test_manager_notifications_are_profile_scoped(self):
+        own = ManagerNotification.objects.create(manager=self.manager, message="Team update")
+        ManagerNotification.objects.create(manager=self.other_manager, message="Private team update")
+        self.authenticate_as(self.manager_user)
+
+        response = self.client.get("/api/v1/notifications/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([row["id"] for row in response.data["results"]], [own.pk])
+
+    def test_unverified_and_pending_profiles_can_read_onboarding_notifications(self):
+        unverified_user = User.objects.create_user(
+            username="unverified-notifications", password="StrongPassword123!"
+        )
+        unverified_driver = Driver.objects.create(user=unverified_user, is_email_verified=False)
+        driver_notification = DriverNotification.objects.create(
+            driver=unverified_driver,
+            message="Verify your email address.",
+        )
+        self.authenticate_as(unverified_user)
+        driver_response = self.client.get("/api/v1/notifications/")
+
+        pending_user = User.objects.create_user(
+            username="pending-notifications", password="StrongPassword123!"
+        )
+        pending_mechanic = Mechanic.objects.create(
+            user=pending_user,
+            is_email_verified=True,
+            status=False,
+        )
+        mechanic_notification = MechanicNotification.objects.create(
+            mechanic=pending_mechanic,
+            message="Your mechanic profile is under review.",
+        )
+        self.authenticate_as(pending_user)
+        mechanic_response = self.client.get("/api/v1/notifications/")
+
+        self.assertEqual(driver_response.status_code, 200)
+        self.assertEqual([row["id"] for row in driver_response.data["results"]], [driver_notification.pk])
+        self.assertEqual(mechanic_response.status_code, 200)
+        self.assertEqual([row["id"] for row in mechanic_response.data["results"]], [mechanic_notification.pk])
+
+    def test_accounts_without_one_mobile_profile_cannot_read_notifications(self):
+        staff_user = User.objects.create_user(
+            username="notification-staff-only", password="StrongPassword123!"
+        )
+        self.authenticate_as(staff_user)
+
+        response = self.client.get("/api/v1/notifications/")
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_notification_list_does_not_support_writes(self):
+        notification = DriverNotification.objects.create(driver=self.driver, message="Unread update")
+        self.authenticate_as(self.driver_user)
+
+        create_response = self.client.post(
+            "/api/v1/notifications/",
+            {"message": "Injected update"},
+            format="json",
+        )
+        update_response = self.client.patch(
+            "/api/v1/notifications/",
+            {"is_read": True},
+            format="json",
+        )
+        notification.refresh_from_db()
+
+        self.assertEqual(create_response.status_code, 405)
+        self.assertEqual(update_response.status_code, 405)
+        self.assertFalse(notification.is_read)
 
     def test_driver_can_retrieve_own_request(self):
         self.authenticate_as(self.driver_user)

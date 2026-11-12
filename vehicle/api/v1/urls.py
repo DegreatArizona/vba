@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     MobileLoginView,
     MobileLogoutView,
+    MobileNotificationListView,
     MobileProfileView,
     MobileRequestDetailView,
     MobileRequestListView,
@@ -18,4 +19,5 @@ urlpatterns = [
     path("me/", MobileProfileView.as_view(), name="me"),
     path("requests/", MobileRequestListView.as_view(), name="requests"),
     path("requests/<int:pk>/", MobileRequestDetailView.as_view(), name="request-detail"),
+    path("notifications/", MobileNotificationListView.as_view(), name="notifications"),
 ]
