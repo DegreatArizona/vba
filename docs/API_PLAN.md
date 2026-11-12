@@ -1,6 +1,6 @@
 # Mobile API Plan
 
-**Status:** Proposal only. No API code has been added. Reuse the existing Django models and domain rules; do not create a second database or reimplement request/payment rules in React Native.
+**Status:** Initial API foundation implemented on `v0/mobile-api-foundation`: JWT login/refresh/logout, current-user profile, and paginated role-scoped request reads. The remaining endpoint matrix is still a proposal. Reuse existing Django models and domain rules; do not create a second database or reimplement request/payment rules in React Native.
 
 ## Recommended approach
 

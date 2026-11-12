@@ -4,7 +4,7 @@
 
 ## Executive summary
 
-The repository contains a Django 5.1.2 server-rendered website for the AutoAid/vehicle-breakdown product. Its only first-party Django app is `vehicle`; Django Admin remains the platform administration interface. The website has driver, mechanic, and manager page/view workflows, but no Django REST Framework API, mobile application, test suite, or clear API versioning. It uses Django sessions and built-in `User`, role profiles and groups, a relational DB configured from environment variables, Cloudinary media, Korapay payment flows, SMTP email, OneSignal push setup, and Django Channels/WebSocket code for live location.
+At the Phase 1 audit commit, the repository contained a Django 5.1.4 server-rendered website for the AutoAid/vehicle-breakdown product, with `vehicle` as its only first-party app. DRF was already listed in `requirements.txt` but was not installed in `INSTALLED_APPS` and no API routes existed. The website has driver, mechanic, and manager page/view workflows and uses Django sessions and built-in `User`, role profiles and groups, a relational DB configured from environment variables, Cloudinary media, Korapay payment flows, SMTP email, OneSignal push setup, and Django Channels/WebSocket code for live location. This implementation branch now adds an initial `/api/v1/` mobile API and focused API tests; no mobile client is included.
 
 A mobile client should be added as a separate Expo/React Native/TypeScript application and consume a new, authenticated API on this same Django backend and database. First resolve security and correctness blockers—especially committed Cloudinary credential material, public/CSRF-exempt state-changing flows, payment webhook replay/double-credit risk, and inconsistent role/relationship logic—before exposing those flows through APIs. Preserve the current site and existing records; do not apply schema changes until migration state and production data are verified.
 
@@ -24,11 +24,11 @@ A mobile client should be added as a separate Expo/React Native/TypeScript appli
 - `banks.json` — bank reference data.
 - `README.md` — currently minimal and not an operational setup guide.
 
-There is no Expo/React Native project, package manifest, DRF serializer/view/router layer, or dedicated automated test module evident in the inspected tree. The Django template directory is configured as `template` (singular).
+There is no Expo/React Native project or package manifest. This implementation branch adds a DRF serializer/view/router layer and role/ownership API tests. The Django template directory is configured as `template` (singular).
 
 ## Technologies and integrations found
 
-- Python / Django 5.1.2; Django template rendering, forms, auth, admin, sessions and ORM.
+- Python / Django 5.1.4; Django template rendering, forms, auth, admin, sessions and ORM.
 - Relational database configured with `ENGINE`, `NAME`, `USER`, `PASSWORD`, `HOST`, and `PORT` environment variables; the actual production engine and deployment connection must be confirmed from deployment configuration, not inferred from source.
 - Django Channels/WebSocket consumer and ASGI routing for request/mechanic location updates. `Procfile` starts the WSGI app; production ASGI/channel-layer deployment is not established by the checked-in Procfile.
 - Cloudinary model fields and media storage.
@@ -36,7 +36,7 @@ There is no Expo/React Native project, package manifest, DRF serializer/view/rou
 - SMTP email; OneSignal configuration and notification service; browser service-worker/PWA files.
 - OpenAI key configuration and chatbot view/client code.
 - WhiteNoise, Gunicorn, Jazzmin, widget-tweaks, django-pwa, sitemap, and decouple.
-- No DRF, JWT, Expo, React Native, or mobile-specific dependency is present in the inspected requirements/source.
+- DRF 3.15.2 and SimpleJWT are now enabled for the initial API on this implementation branch; no Expo/React Native client is included.
 
 ## Django applications
 
@@ -44,7 +44,7 @@ First-party apps:
 
 1. `vehicle` — business domain and website.
 
-Installed Django/contrib and third-party apps include `django.contrib.admin`, `auth`, `contenttypes`, `sessions`, `messages`, `staticfiles`, `django.contrib.sitemaps`, `jazzmin`, `widget_tweaks`, `cloudinary`, and `pwa`. Channels-related code is present; confirm its installed app/configuration and runtime deployment before relying on it. This inventory is based on `INSTALLED_APPS` and imports, not a claim that each integration has been fully exercised.
+Installed apps include `django.contrib.admin`, `auth`, `contenttypes`, `sessions`, `messages`, `staticfiles`, `rest_framework`, `rest_framework_simplejwt.token_blacklist`, `django.contrib.sitemaps`, `jazzmin`, `widget_tweaks`, `cloudinary`, `pwa`, and `vehicle`. Channels-related code is present; confirm its installed app/configuration and runtime deployment before relying on it. This inventory is based on `INSTALLED_APPS` and imports, not a claim that each integration has been fully exercised.
 
 ## Main request lifecycle (source-level)
 
@@ -62,4 +62,4 @@ This is a map of source code paths, not confirmation of end-to-end provider beha
 
 ## Audit limitations and next validation
 
-This is a source inspection, not a production database migration check or live integration test. Before implementation, inspect the deployed database engine, migration-applied state, representative non-sensitive records, provider webhook documentation, Vercel cron invocation/authentication, channels layer, and actual payment/withdrawal provider behavior. A test suite was not located; add focused tests before broad changes.
+This remains a source inspection, not a production database migration check or live integration test. Before further implementation, inspect the deployed database engine, migration-applied state, representative non-sensitive records, provider webhook documentation, Vercel cron invocation/authentication, channels layer, and actual payment/withdrawal provider behavior. The API branch adds focused authorization tests; the legacy website and external integrations still need broader regression/provider-backed coverage.

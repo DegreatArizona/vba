@@ -4,6 +4,12 @@ from django.utils import timezone
 from cloudinary.models import CloudinaryField
 from datetime import date, timedelta
 from django.utils.timezone import localtime
+
+
+def default_subscription_expiration_date():
+    return date.today() + timedelta(days=30)
+
+
 ##################################
 #             Mechanic           #
 ##################################
@@ -31,7 +37,7 @@ class Mechanic(models.Model):
     rating = models.FloatField(default=0.0)
     is_pro = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
-    subscription_expiration_date = models.DateField(null=True, blank=True, default=date.today() + timedelta(days=30))
+    subscription_expiration_date = models.DateField(null=True, blank=True, default=default_subscription_expiration_date)
 
     @property
     def get_name(self):
@@ -107,7 +113,7 @@ class Manager(models.Model):
     guarantor2_email = models.CharField(max_length=150, null=True)
     guarantor2_pic = CloudinaryField('profile picture', null=True, blank=True)
     is_email_verified = models.BooleanField(default=False)
-    subscription_expiration_date = models.DateField(null=True, blank=True, default=date.today() + timedelta(days=30))
+    subscription_expiration_date = models.DateField(null=True, blank=True, default=default_subscription_expiration_date)
 
     @property
     def get_name(self):
@@ -166,7 +172,7 @@ class Driver(models.Model):
     vehicle_model = models.CharField(max_length=150, null=True, blank=True)
     is_pro = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
-    subscription_expiration_date = models.DateField(null=True, blank=True, default=date.today() + timedelta(days=30))
+    subscription_expiration_date = models.DateField(null=True, blank=True, default=default_subscription_expiration_date)
 
     @property
     def get_name(self):

@@ -43,7 +43,7 @@ Driver/Mechanic/Manager 1──* respective notifications/history rows
 - `Request.cost`, `tax`, balances, salaries, charges and withdrawal amount use integer fields while history's received amount uses `DecimalField`. Currency units/rounding are therefore not uniform in the schema; document whether values are minor or major currency units before changing clients or calculations.
 - `transaction_reference` on Request has a non-unique default. Payment histories have unique references, but there is no single ledger/settlement model tying every charge, salary allocation, withdrawal and reversal together.
 - `Attendance` lacks a declared uniqueness rule. Feedback is not tied to the rated party or request. Rating fields are floating-point numbers without a verified aggregation path.
-- Defaults involving `date.today()` / computed date values are evaluated at import/migration definition time when set as values; confirm whether expiry defaults remain correct for new rows.
+- `subscription_expiration_date` previously used `date.today() + timedelta(days=30)` as a value, so the default was frozen at process import and generated a new migration as the date advanced. The API implementation now uses a callable default and migration `0092` updates Driver, Mechanic, and Manager field state without rewriting existing expiry values.
 
 ## Migrations and preservation
 
@@ -55,4 +55,4 @@ There are 91 numbered migrations, documenting repeated field alterations and bus
 4. Add only reversible/additive migrations unless an approved, data-preserving migration plan exists.
 5. Test migrations on a scrubbed copy and rehearse rollback/restore; never delete historical financial or request records.
 
-No schema migration is proposed or run in Phase 1.
+No schema migration was proposed or run in Phase 1. The API foundation adds migration `0092_dynamic_subscription_expiration_default.py` for the callable expiry default. The SimpleJWT blacklist app also requires its upstream migrations to be applied in each environment. No production database migration was run in this session.

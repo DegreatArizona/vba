@@ -22,7 +22,8 @@
 
 ### 1. Compatible backend foundation
 
-1. Add DRF and a versioned `/api/v1/` namespace without changing current page URLs.
+ 1. Initial DRF `/api/v1/` namespace and read-only foundation are implemented on `v0/mobile-api-foundation`; retain existing page URLs and complete the remaining API phases only after the security/data prerequisites below.
+
 2. Add mobile-specific authentication while retaining session auth for the website. Define revocation, expiry, password-reset behavior and rate limits.
 3. Add explicit profile/role serialization and permission matrix; test anonymous, wrong-role, wrong-owner and cross-manager cases.
 4. Publish an API schema and API compatibility policy. Add error envelope, pagination and throttling.

@@ -22,6 +22,7 @@ from django.shortcuts import render
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v1/', include('vehicle.api.v1.urls')),
     path('', include('vehicle.urls')),
     path('', include('pwa.urls')),
 ]
