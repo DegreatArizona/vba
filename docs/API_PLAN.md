@@ -1,10 +1,10 @@
 # Mobile API Plan
 
-**Status:** Initial API foundation implemented on `v0/mobile-api-foundation`: JWT login/refresh/logout, current-user profile, and paginated role-scoped request reads. The remaining endpoint matrix is still a proposal. Reuse existing Django models and domain rules; do not create a second database or reimplement request/payment rules in React Native.
+**Status:** The initial Django API and Expo client foundation are implemented on feature branches. The API provides JWT login/refresh/logout, current-user profile, and paginated role-scoped request reads; the client in `mobile/` provides sign-in, account, and request-list screens. The remaining endpoint matrix is still a proposal. Reuse existing Django models and domain rules; do not create a second database or reimplement request/payment rules in React Native.
 
 ## Recommended approach
 
-Add Django REST Framework as a clearly separated API layer (for example, `vehicle.api.v1`) alongside existing server-rendered routes. Keep current Django session-auth website behavior intact. For native clients, select a maintained DRF-compatible token strategy after confirming the deployment constraints; short-lived access tokens plus revocable/rotatable refresh tokens are preferable to long-lived bearer tokens. Store tokens only in platform secure storage. Enforce permissions and object scoping on every endpoint; client-side role-based navigation is not authorization.
+The API is implemented in `vehicle.api.v1` alongside the existing server-rendered routes, with Django website session behavior left intact. The mobile API uses SimpleJWT with short-lived access tokens and rotating, blacklisted refresh tokens. Native clients store tokens in platform secure storage; the browser preview uses memory-only storage. Enforce permissions and object scoping on every endpoint; client-side role-based navigation is not authorization.
 
 Use serializers with explicit allowlists, request validation, pagination, consistent error responses, throttling on authentication/expensive operations, and versioned routes. Add tests for each role, ownership, manager scope, state transition, and anonymous access before connecting the app.
 

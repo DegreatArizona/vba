@@ -24,7 +24,7 @@ A mobile client should be added as a separate Expo/React Native/TypeScript appli
 - `banks.json` — bank reference data.
 - `README.md` — currently minimal and not an operational setup guide.
 
-There is no Expo/React Native project or package manifest. This implementation branch adds a DRF serializer/view/router layer and role/ownership API tests. The Django template directory is configured as `template` (singular).
+At the Phase 1 audit commit, there was no Expo/React Native project or package manifest. The API layer and role/ownership tests were added in the follow-up API branch; the subsequent mobile branch adds the Expo client under `mobile/`. The Django template directory is configured as `template` (singular).
 
 ## Technologies and integrations found
 
@@ -36,7 +36,7 @@ There is no Expo/React Native project or package manifest. This implementation b
 - SMTP email; OneSignal configuration and notification service; browser service-worker/PWA files.
 - OpenAI key configuration and chatbot view/client code.
 - WhiteNoise, Gunicorn, Jazzmin, widget-tweaks, django-pwa, sitemap, and decouple.
-- DRF 3.15.2 and SimpleJWT are now enabled for the initial API on this implementation branch; no Expo/React Native client is included.
+- DRF 3.15.2 and SimpleJWT were enabled for the initial API; the Expo/React Native client is now implemented separately in `mobile/`.
 
 ## Django applications
 

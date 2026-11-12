@@ -1,6 +1,13 @@
 # Mobile App Plan
 
-**Status:** Proposed architecture only. The repository currently contains no React Native/Expo project. Build a native client; do not wrap the current website in a WebView.
+**Status:** The first native client slice is implemented in `mobile/` using Expo Router. It supports username/password sign-in, role-aware request lists and profile views for Driver, Mechanic, and Manager, plus secure native token storage, refresh/logout, and approval, verification, loading, empty, and error states. It consumes only the existing read/auth API; request creation, payments, location, and other write flows remain out of scope until their backend contracts are ready. The client is native-first and does not wrap the website in a WebView.
+
+## Current first slice
+
+- `mobile/` is a standalone Expo Router app; its routes live in `src/app/` and consume the existing `/api/v1/` endpoints.
+- Configure `EXPO_PUBLIC_API_BASE_URL` with the API origin shown in `.env.example`. Production builds reject non-HTTPS API origins.
+- iOS and Android store access/refresh tokens in Expo SecureStore. The web preview keeps tokens in memory only and does not persist them across reloads.
+- The API currently supports sign-in, profile reads, request-list reads, refresh, and logout. The client intentionally has no registration, request creation, payments, location tracking, or push notifications yet.
 
 ## Product shape
 
@@ -12,14 +19,10 @@ Keep the Django website/backend at the repository root. Place mobile in an isola
 
 ```text
 mobile/
-  app/                 # Expo Router route groups and layouts
-  src/components/      # accessible reusable UI
-  src/features/        # auth, driver, mechanic, manager, requests, wallet
-  src/lib/api/         # typed API client, auth refresh, error mapping
-  src/lib/storage/     # secure token storage adapter
-  src/theme/           # tokens, typography, spacing
-  src/types/           # API DTOs and domain types
-  assets/
+  src/app/             # Expo Router routes and authenticated tabs
+  components/          # accessible reusable UI
+  lib/                 # typed API client, auth refresh, secure token storage, types, theme
+  assets/              # app icon and images
 ```
 
 Use Expo Router if it fits the current Expo SDK and team workflow. Keep API DTOs separate from UI models. Use a small server-state/cache layer and React state for ephemeral UI state; do not make local device storage the system of record for requests or money. Store only session credentials and explicitly offline-safe non-sensitive cache data securely/appropriately.

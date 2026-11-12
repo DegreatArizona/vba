@@ -1,6 +1,6 @@
 # Mobile API v1
 
-The initial API lives alongside the existing Django website under `/api/v1/`. It uses the existing database and role-profile models. This is a backend foundation only; there is no Expo/React Native client yet.
+The API lives alongside the existing Django website under `/api/v1/` and uses the existing database and role-profile models. The first native Expo client is in `mobile/` and consumes only the authentication, profile, and read-only request endpoints documented here.
 
 ## Authentication
 
@@ -27,4 +27,4 @@ The request DTO is explicitly allowlisted and excludes transaction references, i
 
 ## Known follow-up
 
-Add OpenAPI schema, API tests under the deployed environment, login/reset/registration flows as required, and the mobile app. Before exposing write or financial actions, reconcile migration/model state and add atomic transition, ownership, webhook idempotency, and ledger tests as laid out in `API_PLAN.md` and `MIGRATION_PLAN.md`.
+Add an OpenAPI schema and deployed-environment API checks. Registration, password reset, write actions, and financial flows remain unimplemented. If the app is exported for web and hosted on a different origin, configure a narrow CORS allowlist rather than enabling wildcard origins. Before exposing write or financial actions, reconcile migration/model state and add atomic transition, ownership, webhook idempotency, and ledger tests as laid out in `API_PLAN.md` and `MIGRATION_PLAN.md`.
