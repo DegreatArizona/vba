@@ -1,0 +1,60 @@
+<form id="locationForm"></form>
+
+<script>
+    function updateLocation() {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                $.ajax({
+                    url: '/api/update-mechanic-location/{{accept.id}}/',
+                    type: 'POST',
+                    data: JSON.stringify({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    }),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    success: function (data) {
+                        if (data.status === 'Location updated') {
+                            console.info('Location updated successfully!');
+                        } else if (data.error) {
+                            alert(`Error: ${data.error}`);
+                        } else {
+                            console.info('Location updated!');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert(`Error updating location: ${error}`);
+                        console.error('AJAX error:', error);
+                    }
+                });
+            },
+            function (error) {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert('Permission denied. Please allow location access.');
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert('Location information is unavailable.');
+                        break;
+                    case error.TIMEOUT:
+                        alert('Location request timed out.');
+                        break;
+                    default:
+                        alert('An unknown error occurred.');
+                        break;
+                }
+            }
+        );
+    }
+
+    // Call updateLocation every 10 seconds
+    setInterval(updateLocation, 10000);
+</script>

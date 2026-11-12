@@ -1,0 +1,76 @@
+{% extends "mechanicbase.html" %}
+{% load static %}
+{% block content %}
+<main class="main-content offset-md-3 col-md-9 offset-lg-2 col-lg-10">
+          <!-- head -->
+          <section class="head">
+            <!-- first row -->
+            <article class="head-title container">
+              <div class="head-title1">
+                <h2 class="page-title mt-3">Job History</h2>
+              </div>
+            </article>
+            <!-- second row -->
+            <article class="">
+              <div class="table-responsive mt-4">
+                      {% if requests %}
+                      <table class="table table-striped table-hover table-borderless border-0" id="invoiceTable">
+                        <thead class="light-thead">
+                          <tr>
+                            <th class="text-body-tertiary">Job ID</th>
+                            <th class="text-body-tertiary">Date</th>
+                            <th class="text-body-tertiary">Vehicle</th>
+                            <th class="text-body-tertiary">Service Type</th>
+                            <th class="text-body-tertiary">Amount Earned</th>
+                            <th class="text-body-tertiary">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                          {% for request in requests %}
+                          <tr>
+                            <td>{{request.id}}</td>
+                            <td>{{request.date}}</td>
+                            <td>{{request.vehicle_name}}</td>
+                            <td>{{request.category}}</td>
+                            <td>&#x20A6; {{request.cost}}</td>
+                            <td>
+                              {% if request.invoice == 'Paid' %}
+                                  <span class="status table-success-status">{{ request.invoice }}</span>
+                              {% elif request.invoice == 'Pending' %}
+                                  <span class="status table-danger-status">{{ request.invoice }}</span>
+                              {% elif request.invoice == 'Cancelled' %}
+                                  <span class="status table-danger-status">{{ request.invoice }}</span>
+                              {% else %}
+                                  <span class="status table-pending-status">{{ request.invoice }}</span>
+                              {% endif %}
+                            </td>
+                          </tr>
+                          {% endfor %}
+                          <!-- Add more rows as needed -->
+                        </tbody>
+                        <tfoot class="light-thead">
+                          <tr>
+                            <th class="text-body-tertiary">Job ID</th>
+                            <th class="text-body-tertiary">Date</th>
+                            <th class="text-body-tertiary">Vehicle</th>
+                            <th class="text-body-tertiary">Service Type</th>
+                            <th class="text-body-tertiary">Amount Earned</th>
+                            <th class="text-body-tertiary">Status</th>
+                          </tr>
+                        </tfoot>
+                      </table>
+                      {% else %}
+                      <section class="no-request mt-4">
+                      <h2>No jobs found for this period!</h2>
+                      <img
+                        src="{% static '/image/no-info.svg' %}"
+                        class="img-fluid"
+                        alt=""
+                      />
+                    </section>
+                      {% endif %}
+                    </div>
+            </article>
+          </section>
+        </main>
+{% endblock content %}

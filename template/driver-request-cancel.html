@@ -1,0 +1,37 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+<style>
+.request-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.request-container div{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+.request-container button, .request-container a{
+    padding: 10px
+}
+</style>
+    <div class="request-container">
+    <h3>Are you sure you want to cancel your request for Vehicle Model: {{ request.vehicle_name }} Problem Description: {{ request.problem_description }}</h3>
+<form method="POST">
+    {% csrf_token %}
+    <div>
+    <button class="btn btn-primary" type="submit">Yes Cancel</button>
+    <a class="btn btn-outline-primary" href="{% url 'request-detail' request.id %}">No Keep</a>
+    </div>
+</form>
+
+        
+    </div>
+{% endblock content %}

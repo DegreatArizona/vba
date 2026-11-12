@@ -1,0 +1,38 @@
+{% extends "mechanicbase.html" %}
+{% load static %}
+{% block content %}
+<style>
+.request-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.request-container div{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+.request-container button, .request-container a{
+    padding: 10px
+}
+</style>
+    <div class="request-container">
+    <h4>Are you sure you want to release this request? Vehicle Model: {{ accept_detail.vehicle_name }} Problem Description: {{ accept_detail.problem_description }} <br> Customer name: {{accept_detail.driver.user.first_name}} {{accept_detail.driver.user.last_name}} </h4>
+    <b class="text-danger">Please confirm payment before releasing a request</b>
+<form method="POST">
+    {% csrf_token %}
+    <div>
+    <button class="btn btn-primary" type="submit">I have confirm payment</button>
+    <a class="btn btn-outline-primary" href="{% url 'mechanic-dashboard'%}">Not confiremed yet</a>
+    </div>
+</form>
+
+        
+    </div>
+{% endblock content %}

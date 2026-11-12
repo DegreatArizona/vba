@@ -1,0 +1,111 @@
+{% extends "managerbase.html" %}
+{% load static %}
+{% block content %}
+<style>
+.request-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.request-container input, .request-container textarea, .request-container select{
+    width: 100%;
+    outline: none;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(10, 116, 218, 0.90);
+}
+.request-container label{
+    display: block;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.request-container button, .request-container a{
+    width: 100%;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(10, 116, 218, 0.90);
+    margin-top: 20px;
+}
+</style>
+<div class="request-container">
+{% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+    <h2>Withdraw your funds</h2>
+    <h4>Balance: {{salary}}</h4>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="" class="form-label">Bank Name</label>
+            <input
+                type="text"
+                class="form-control"
+                name="bank_name"
+                value="{{manager.bank_name}}"
+                readonly
+                aria-describedby="helpId"
+                placeholder=""
+                required
+            />
+        </div>
+        <div class="mb-3">
+            <label for="" class="form-label">Account Name</label>
+            <input
+                type="text"
+                class="form-control"
+                name="account_name"
+                value="{{manager.account_name}}"
+                readonly
+                aria-describedby="helpId"
+                placeholder=""
+                required
+            />
+        </div>
+        <div class="mb-3">
+            <label for="" class="form-label">Account Number</label>
+            <input
+                type="text"
+                class="form-control"
+                name="account_number"
+                value="{{manager.account_number}}"
+                readonly
+                aria-describedby="helpId"
+                placeholder=""
+                required
+            />
+        </div>
+        <div class="mb-3">
+            <label for="" class="form-label">Amount to withdraw</label>
+            <input
+                type="number"
+                class="form-control"
+                name="amount_withdraw"
+                id=""
+                aria-describedby="helpId"
+                placeholder=""
+                required
+            />
+        </div>
+            <div class="mb-3">
+                <label for="" class="form-label">Narration</label>
+                <textarea class="form-control" name="narration" id="" rows="3" placeholder="A brief narration" required></textarea>
+            </div>
+            
+        
+        <b class="text-danger">NB: To edit your account detailes, please go to your profile</b>
+        <button class="btn btn-primary" type="submit">Withdraw</button>
+    </form>
+    <a class="btn btn-outline-primary" href="{% url 'manager-dashboard' %}">Go Back</a>
+</div>
+
+{% endblock content %}

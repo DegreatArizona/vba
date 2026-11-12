@@ -1,0 +1,214 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+<style>
+.request-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.request-container input, .request-container textarea, .request-container select{
+    width: 100%;
+    outline: none;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(10, 116, 218, 0.90);
+}
+.request-container label{
+    display: block;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.request-container button, .request-container a{
+    width: 100%;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(10, 116, 218, 0.90);
+    margin-top: 20px;
+}
+</style>
+        <div class="container">
+        {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        </div>
+       <div class="request-container">
+    <h2>Fund Your Wallet</h2>
+    <form id="paymentForm" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input
+                type="number"
+                class="form-control"
+                name="amount"
+                id="amount"
+                aria-describedby="helpId"
+                placeholder=""
+            />
+        </div>
+        <div class="mb-3">
+            <label for="narration" class="form-label">Narration</label>
+            <textarea 
+                class="form-control" 
+                name="narration" 
+                id="narration" 
+                rows="3" 
+                placeholder="A brief narration" 
+                required
+            ></textarea>
+        </div>
+        <small id="helpId" class="form-text text-muted">Minimum amount to fund is ₦1,000</small>
+        <button class="btn btn-primary" type="submit">Pay With Card</button>
+    </form>
+    <a class="btn btn-outline-primary" href="{% url 'driver-dashboard' %}">Cancel</a>
+</div>
+
+
+
+<script>
+    const payForm = document.getElementById("paymentForm");
+
+payForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const narration = document.getElementById("narration").value;
+    const amount = parseFloat(document.getElementById("amount").value); // Convert to number
+
+    // Validate the inputs
+    if (!narration.trim()) {
+        alert("Narration is required.");
+        return;
+    }
+
+    if (isNaN(amount) || amount <= 999) {
+        const helpId = document.getElementById("helpId");
+        helpId.style.color = "red";
+        helpId.textContent = "Amount must be greater than 999 NGN.";
+        helpId.style.display = "block";
+    } else {
+        // Proceed to initialize Korapay
+        fundWallet(amount, narration);
+    }
+});
+
+function fundWallet(amount, narration) {
+    window.Korapay.initialize({
+        key: "pk_test_XSNM2tCEi2MShm3gRcVFDNiJUJHtbXCuNdiVL2n6",
+        reference: "{{ ref }}", // Dynamically generated server-side
+        amount: amount + 50, // Adjusted amount
+        currency: "NGN",
+        customer: {
+            name: "{{ driver.user.first_name }} {{ driver.user.last_name }}",
+            email: "{{ driver.user.email }}",
+        },
+        narration: `${narration}`, // Correct string interpolation
+        notification_url: "https://autoaid.com.ng/korapay-webhook/",
+        metadata: {
+            transaction_type: "fund_wallet",
+            reference_id: "{{ driver.id }}",
+        },
+        onClose: function () {
+            alert("Payment process was closed.");
+        },
+        onSuccess: function (data) {
+            alert("Payment successful! \nYou'll be redirected in 10 seconds...");
+            console.log("Success data:", data);
+            setTimeout(function () {
+                window.location.href = "{% url 'driver-dashboard' %}";
+            }, 10000);
+        },
+        onFailed: function (data) {
+            alert("Payment Failed");
+            console.log("Failed data:", data);
+        },
+        onPending: function () {
+            alert("Payment pending, please wait while it is being processed.");
+        }
+    });
+}
+
+</script>
+
+<div class="container">
+<h2 class="my-4">Funding History</h2>
+{% if history %}
+    <section class="table-responsive mt-4">
+        <table
+          id="invoiceTable"
+          class="table table-hover table-striped table-borderless border-0">
+          <thead>
+            <tr>
+              <th class="text-body-tertiary">ID</th>
+              <th class="text-body-tertiary">Ref Number</th>
+              <th class="text-body-tertiary">Amount Recieved</th>
+              <th class="text-body-tertiary">Charges</th>
+              <th class="text-body-tertiary">Narration</th>
+              <th class="text-body-tertiary">Status</th>
+              <th class="text-body-tertiary">Date</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Mapping through the history data -->
+            <!-- first data row -->
+            {% for fund in history %}
+            <tr>
+              <td>{{ fund.id }}</td>
+              <td>{{ fund.transaction_reference }}</td>
+              <td>&#x20A6;{{ fund.amount_recieved }}</td>
+              <td>&#x20A6;{{ fund.charges }}</td>
+              <td>{{fund.narration}}</td>
+              <td>
+              {% if fund.status == 'Success' %}
+                <span class="status table-success-status">{{ fund.status }}</span>
+            {% elif fund.status == 'Pending' %}
+                <span class="status table-danger-status">{{ fund.status }}</span>
+            {% elif fund.status == 'Failed' %}
+                <span class="status table-danger-status">{{ fund.status }}</span>
+            {% else %}
+                <span class="status table-pending-status">{{ fund.status }}</span>
+            {% endif %}
+              </td>
+              <td>{{ fund.date|date:"F j, Y" }}</td>
+            </tr>
+            {% endfor %}
+            <!-- Add more rows as needed -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <th class="text-body-tertiary">ID</th>
+              <th class="text-body-tertiary">Ref Number</th>
+              <th class="text-body-tertiary">Amount Recieved</th>
+              <th class="text-body-tertiary">Charges</th>
+              <th class="text-body-tertiary">Narration</th>
+              <th class="text-body-tertiary">Status</th>
+              <th class="text-body-tertiary">Date</th>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+    {% else %}
+      <section class="no-request mt-4">
+        <h2>No previous service requests found!</h2>
+        <img
+          src="{% static '/image/no-history.svg' %}"
+          class="img-fluid"
+          alt=""
+        />
+        
+        <a href="driver/request-service">Request Service</a>
+      </section>
+    {% endif %}
+</div>
+
+{% endblock content %}

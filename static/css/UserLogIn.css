@@ -1,0 +1,233 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;900&display=swap");
+
+/* General */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --blue: rgba(10, 116, 218, 0.9);
+  --dark: rgba(33, 33, 33, 0.8);
+  --dark-blue-clr: rgb(0, 0, 139);
+}
+
+body {
+  overflow-x: hidden;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--dark);
+  text-align: left;
+  background-color: #fff;
+}
+
+main {
+  max-width: 40%;
+  margin: auto;
+  padding: 1rem;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Header */
+h1 {
+  text-align: center;
+  margin: 1rem 0 0.5rem;
+  font-weight: bold;
+}
+
+/* Divider */
+hr {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.divider-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.divider-line {
+  flex: 1;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.divider-text {
+  padding: 0 10px;
+  color: #333;
+}
+
+/* Socials */
+.social,
+.button button,
+.button a {
+  display: block;
+  width: 100%;
+  /* height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem; */
+  margin-bottom: 0.5rem;
+  /* font-size: 1rem;
+  font-weight: 400; */
+  line-height: 1.5;
+  text-align: center;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 1rem;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+.social-media-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.social-media-link img {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+/* Logins */
+.button p {
+  text-align: center;
+  font-weight: bold;
+  margin: 0.5rem;
+}
+
+.button a {
+  border-color: var(--blue);
+  color: var(--blue);
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding-block: 12px;
+}
+
+.button a:hover {
+  background-color: rgba(224, 224, 224, 0.555);
+}
+
+.button button {
+  background-color: var(--blue);
+  color: #fff;
+  cursor: pointer;
+  transition: 0.6s;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding-block: 12px;
+}
+.button button:hover {
+  background-color: var(--dark-blue-clr);
+}
+
+.input-control button {
+  border: none;
+  background-color: #fff;
+  margin-left: auto;
+}
+
+input {
+  display: block;
+  width: 100%;
+  height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+
+label {
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+
+.toggle-password {
+  background: none;
+  border: none;
+  color: var(--dark);
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: right;
+  float: right; /* Aligns the button to the right */
+}
+
+.password-container {
+  display: flex;
+  justify-content: space-between; /* Aligns the password input and toggle button */
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: 1rem;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox input[type="checkbox"] {
+  margin: 0;
+  width: 16px; /* Reduced size of the checkbox */
+  height: 16px; /* Reduced size of the checkbox */
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+.checkbox label {
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  main {
+    max-width: 90%;
+  }
+
+  .social,
+  .button button,
+  .button a {
+    font-size: 0.9rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.25rem;
+  }
+
+  .password-container button {
+    margin-left: 0;
+  }
+}
+@media (max-width: 768px) {
+  main {
+    max-width: 98%;
+  }
+}

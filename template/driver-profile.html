@@ -1,0 +1,159 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+
+<main class="history container">
+      <h2 class="my-4">Profile</h2>
+      {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+      <form id="requestServiceForm" action="" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+        <h5 class="text-black-50">Profile Information</h5>
+        <section class="input-field-container">
+        <div class="input-profile-pic d-flex">
+        <div class="profile-pic-con">
+        {% if driver.profile_pic %}
+            <img src="{{ driver.profile_pic.url }}" alt="Profile Picture">
+        {% else %}
+            <img src="{% static 'image/user.png' %}" alt="Default Profile Picture">
+        {% endif %}
+        </div>
+        <label for="input-profile-pic" style="margin-top: 110px; margin-left: -40px;">
+            <input
+                type="file"
+                class="d-none"
+                name="profile_pic"
+                id="input-profile-pic"
+                 />
+            <img
+            src="{% static '/image/camera.svg' %}"
+            class=""
+            alt="camera"
+        />
+        </div>
+        </label>
+        </section>
+        <section class="input-field-container">
+          <div class="input-field">
+            <label for="first_name" class="input-label">First Name</label>
+            <input
+              name="first_name"
+              type="text"
+              id="first_name"
+              placeholder="Input first name"
+              value="{{driver.user.first_name}}"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="last_name" class="input-label"
+              >Last Name</label
+            >
+            <input
+              name="last_name"
+              type="text"
+              id="last_name"
+              placeholder="Input last name"
+              value="{{driver.user.last_name}}"
+              required />
+          </div>
+        </section>
+        <section class="input-field-container">
+          <div class="input-field">
+            <label for="email" class="input-label"
+              >Email Address</label
+            >
+            <input
+              name="email"
+              type="email"
+              id="email"
+              value="{{driver.user.email}}"
+              placeholder="Input email address"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="mobile" class="input-label">Phone Number</label>
+            <input
+              name="mobile"
+              type="tel"
+              id="mobile"
+              value="{{driver.mobile}}"
+              placeholder="Input phone number"
+              required />
+          </div>
+        </section>
+        <section class="input-field-container">
+          <div class="input-field">
+            <label for="vehicle_model" class="input-label"
+              >Vehicle Model</label
+            >
+            <input
+              name="vehicle_model"
+              type="text"
+              id="vehicle_model"
+              value="{{driver.vehicle_model}}"
+              placeholder="Input vehicle model"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="license_no" class="input-label">License Number</label>
+            <input
+              name="license_no"
+              type="text"
+              id="license_no"
+              value="{{driver.license_no}}"
+              placeholder="Input license no"
+              required />
+          </div>
+        </section>
+        <section class="input-field-container">
+        <div class="input-field">
+            <label for="username" class="input-label"
+              >Username</label
+            >
+            <input
+              name="username"
+              id="username"
+              value="{{driver.user.username}}"
+              placeholder="Input your username"
+              required/>
+          </div>
+          <div class="input-field">
+            <label for="password" class="input-label">Confirm Password</label>
+            <input
+              name="password"
+              type="password"
+              id="password"
+              placeholder="Input password"
+              required />
+          </div>
+        </section>
+        <section class="input-field-container">
+        <div class="input-field">
+            <label for="address" class="input-label"
+              >Home / Office Address</label
+            >
+            <input
+              name="address"
+              id="address"
+              value="{{driver.address}}"
+              placeholder="Input your home or office address"
+              required/>
+          </div>
+        </section>
+        <section class="location-container">
+          <button type="submit" class="location-btn">
+            Save <i class="fa fa-save" aria-hidden="true"></i>
+          </button>
+          <button type="button" onclick="window.location='driver-dashboard'" class="outline-btn">
+            Cancel <i class="fa fa-times-circle-o" aria-hidden="true"></i>
+          </button>
+        </section>
+      </form>
+    </main>
+{% endblock content %}

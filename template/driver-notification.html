@@ -1,0 +1,66 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+<!-- Inherit header from dashboard -->
+    <main class="history container">
+      <h2 class="my-4">Notifications</h2>
+      {% if notifications %}
+      <section class="table-responsive mt-4">
+        <table
+          id="notificationTable"
+          class="table table-hover table-borderless border-0">
+          <thead>
+            <tr>
+              <th class="text-body-tertiary">Time</th>
+              <th class="text-body-tertiary">Information</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Mapping through the history data -->
+            {% for notification in notifications %}
+            <tr>
+              <td>{{ notification.timestamp|timesince }} ago</td>
+              <td>{{ notification.message }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th class="text-body-tertiary">Time</th>
+              <th class="text-body-tertiary">Information</th>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+      {% else %}
+      <section class="no-request mt-4">
+        <h2>No previous Notifications</h2>
+        <img
+          src="{% static '/image/no-history.svg' %}"
+          class="img-fluid"
+          alt=""
+        />
+      </section>
+      {% endif %}
+    </main>
+    <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const link = document.querySelector(".not");
+
+    function updateLinkStyle() {
+      const size = window.innerWidth;
+      if (size <= 768) {
+        link.style.color = "rgba(10, 116, 218, 0.9)";
+        link.style.backgroundColor =  ""
+      } else {
+        link.style.backgroundColor = "rgba(10, 116, 218, 0.1)";
+        link.style.color = "rgba(10, 116, 218, 0.9)"; // Reset color if previously set
+      }
+    }
+
+    updateLinkStyle();
+
+  window.addEventListener("resize", updateLinkStyle);
+  });
+</script>
+{% endblock content %}

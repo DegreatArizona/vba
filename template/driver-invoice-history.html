@@ -1,0 +1,108 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+ <!-- Inherit header from dashboard -->
+    <main class="history container">
+      <h2 class="my-4">Invoice History</h2>
+      {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+    {% if invoices %}
+    <section class="table-responsive mt-4">
+        <table
+          id="invoiceTable"
+          class="table table-hover table-striped table-borderless border-0">
+          <thead>
+            <tr>
+              <th class="text-body-tertiary">Invoice Date</th>
+              <th class="text-body-tertiary">Invoice Number</th>
+              <th class="text-body-tertiary">Service Type</th>
+              <th class="text-body-tertiary">Amount (&#x20A6;)</th>
+              <th class="text-body-tertiary">Status</th>
+              <th class="text-body-tertiary">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Mapping through the history data -->
+            <!-- first data row -->
+            {% for invoice in invoices %}
+            <tr>
+              <td>{{ invoice.date|date:"F j, Y" }}</td>
+              <td>#INV{{ invoice.id }}</td>
+              <td>{{ invoice.category }}</td>
+              <td>&#x20A6;{{ invoice.cost }}</td>
+              <td>
+              {% if invoice.invoice == 'Paid' %}
+                <span class="status table-success-status">{{ invoice.invoice }}</span>
+            {% elif invoice.invoice == 'Pending' %}
+                <span class="status table-danger-status">{{ invoice.invoice }}</span>
+            {% elif invoice.invoice == 'Cancelled' %}
+                <span class="status table-danger-status">{{ invoice.invoice }}</span>
+            {% else %}
+                <span class="status table-pending-status">{{ invoice.invoice }}</span>
+            {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'driver-invoice' invoice.id %}" class="btn btn-outline-primary">View</a>
+                        {% if invoice.invoice == 'Paid' %}
+                            <a href="{% url 'driver-invoice' invoice.id %}" class="btn btn-primary">Download</a>
+                        {% elif invoice.invoice == 'Cancelled' %}
+                        {% else %}
+                            <a href="{% url 'driver-invoice' invoice.id %}" class="btn btn-primary">Pay Now</a>
+                        {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+            <!-- Add more rows as needed -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <th class="text-body-tertiary">Invoice Date</th>
+              <th class="text-body-tertiary">Invoice Number</th>
+              <th class="text-body-tertiary">Service Type</th>
+              <th class="text-body-tertiary">Amount (&#x20A6;)</th>
+              <th class="text-body-tertiary">Status</th>
+              <th class="text-body-tertiary">Action</th>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+    {% else %}
+      <section class="no-request mt-4">
+        <h2>No previous service requests found!</h2>
+        <img
+          src="{% static '/image/no-history.svg' %}"
+          class="img-fluid"
+          alt=""
+        />
+        
+        <a href="driver/request-service">Request Service</a>
+      </section>
+    {% endif %}
+    </main>
+    <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const link = document.querySelector(".in");
+
+    function updateLinkStyle() {
+      const size = window.innerWidth;
+      if (size <= 768) {
+        link.style.color = "rgba(10, 116, 218, 0.9)";
+        link.style.backgroundColor =  ""
+      } else {
+        link.style.backgroundColor = "rgba(10, 116, 218, 0.1)";
+        link.style.color = "rgba(10, 116, 218, 0.9)"; // Reset color if previously set
+      }
+    }
+
+    updateLinkStyle();
+
+  window.addEventListener("resize", updateLinkStyle);
+  });
+</script>
+{% endblock content %}

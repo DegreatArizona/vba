@@ -1,0 +1,16 @@
+{
+    "short_name": "AutoAid",
+    "name": "AutoAid Assistance",
+    "icons": [
+        {
+            "src": "/static/image/logo.svg",
+            "sizes": "192x192",
+            "type": "image/svg"
+        }
+    ],
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#000000"
+}

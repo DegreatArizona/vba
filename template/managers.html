@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanic Managers</title>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+    <style>
+        /* General reset and font setup */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff5722;
+        }
+
+        h2 {
+            color: #007bff;
+            margin-top: 20px;
+        }
+
+        p {
+            font-size: 18px;
+            margin: 10px 0 30px;
+            color: #555;
+        }
+
+        /* Card container for managers */
+        #managers {
+            width: 90%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #managersList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Each manager card */
+        .manager-card {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .manager-card:last-child {
+            border-bottom: none;
+        }
+
+        .manager-card h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .manager-card p {
+            margin: 5px 0 0;
+            font-size: 16px;
+            color: #555;
+        }
+
+        #spinner{
+            display: none;
+        }
+        
+        /* Footer */
+        footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>Mechanic Manager Directory</h1>
+    <p>Connect to the internet for full functionality.</p>
+
+    <!-- Section for managers -->
+    <div id="managers">
+        <h2>Mechanic Managers</h2>
+        <ul id="managersList"></ul>
+        <!-- Spinner -->
+    <div id="spinner" class="d-flex justify-content-center my-3">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    </div>
+
+    <footer>
+        &copy; 2024 AutoAid. All Rights Reserved.
+    </footer>
+    
+    
+    <script>
+    const API_URL = '/api/mechanic-managers'; // Update with your API endpoint
+
+    const spinner = document.getElementById('spinner');
+
+    // Fetch mechanic managers from the server
+    async function fetchMechanicManagers() {
+        spinner.style.display = 'flex'; // Show spinner
+        try {
+            const response = await fetch(API_URL);
+            if (response.ok) {
+                const managers = await response.json();
+                localStorage.setItem('mechanicManagers', JSON.stringify(managers));
+                return managers;
+            } else {
+                console.error('Failed to fetch manager data:', response.statusText);
+                return getMechanicManagers();
+            }
+        } catch (error) {
+            console.error('Error fetching mechanic managers:', error);
+            return getMechanicManagers();
+        } finally {
+            spinner.style.display = 'none'; // Hide spinner
+        }
+    }
+
+    // Retrieve mechanic managers from localStorage
+    function getMechanicManagers() {
+        const storedManagers = localStorage.getItem('mechanicManagers');
+        return storedManagers ? JSON.parse(storedManagers) : [];
+    }
+
+    // Display mechanic managers in the card layout
+    function displayMechanicManagers(managers) {
+        const managersList = document.getElementById('managersList');
+        managersList.innerHTML = ''; // Clear existing content
+
+        if (managers.length > 0) {
+            managers.forEach(manager => {
+                const listItem = document.createElement('li');
+                listItem.className = 'manager-card';
+                listItem.innerHTML = `
+                    <h3>${manager.name}</h3>
+                    <p>Phone: ${manager.phone}</p>
+                `;
+                managersList.appendChild(listItem);
+            });
+        } else {
+            managersList.innerHTML = `
+                <div class="manager-card">
+                    <p>No manager data available offline.</p>
+                </div>
+            `;
+        }
+    }
+
+    // Initialize and display data
+    async function init() {
+        const managers = await fetchMechanicManagers();
+        displayMechanicManagers(managers);
+    }
+
+    init();
+    </script>
+
+
+{% comment %} <script>
+    const API_URL = '/api/mechanic-managers'; // Update with your API endpoint
+
+    // Fetch mechanic managers from the server
+    async function fetchMechanicManagers() {
+        try {
+            const response = await fetch(API_URL);
+            if (response.ok) {
+                const managers = await response.json();
+                localStorage.setItem('mechanicManagers', JSON.stringify(managers));
+                return managers;
+            } else {
+                console.error('Failed to fetch manager data:', response.statusText);
+                return getMechanicManagers();
+            }
+        } catch (error) {
+            console.error('Error fetching mechanic managers:', error);
+            return getMechanicManagers();
+        }
+    }
+
+    // Retrieve mechanic managers from localStorage
+    function getMechanicManagers() {
+        const storedManagers = localStorage.getItem('mechanicManagers');
+        return storedManagers ? JSON.parse(storedManagers) : [];
+    }
+
+    // Display mechanic managers in the card layout
+    function displayMechanicManagers(managers) {
+        const managersList = document.getElementById('managersList');
+        managersList.innerHTML = ''; // Clear existing content
+
+        if (managers.length > 0) {
+            managers.forEach(manager => {
+                const listItem = document.createElement('li');
+                listItem.className = 'manager-card';
+                listItem.innerHTML = `
+                    <h3>${manager.name}</h3>
+                    <p>Phone: ${manager.phone}</p>
+                `;
+                managersList.appendChild(listItem);
+            });
+        } else {
+            managersList.innerHTML = `
+                <div class="manager-card">
+                    <p>No manager data available offline.</p>
+                </div>
+            `;
+        }
+    }
+
+    // Initialize and display data
+    async function init() {
+        const managers = await fetchMechanicManagers();
+        displayMechanicManagers(managers);
+    }
+
+    init();
+
+</script> {% endcomment %}
+
+
+    {% comment %} <script>
+        // Retrieve mechanic managers from localStorage
+        function getMechanicManagers() {
+            const storedManagers = localStorage.getItem('mechanicManagers');
+            if (storedManagers) {
+                const managers = JSON.parse(storedManagers);
+                return managers;
+            } else {
+                return [];
+            }
+        }
+
+        // Display mechanic managers in the card layout
+        function displayMechanicManagers() {
+            const managers = getMechanicManagers();
+            const managersList = document.getElementById('managersList');
+            managersList.innerHTML = ''; // Clear existing content
+            if (managers.length > 0) {
+                managers.forEach(manager => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'manager-card';
+                    listItem.innerHTML = `
+                        <h3>${manager.name}</h3>
+                        <p>Phone: ${manager.phone}</p>
+                    `;
+                    managersList.appendChild(listItem);
+                });
+            } else {
+                managersList.innerHTML = `
+                    <div class="manager-card">
+                        <p>No manager data available offline.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize and display data
+        displayMechanicManagers();
+    </script> {% endcomment %}
+
+    <script
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
+        ></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous"
+        ></script>
+</body>
+</html>

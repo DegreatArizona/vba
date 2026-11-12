@@ -1,0 +1,94 @@
+{% extends "managerbase.html" %}
+{% load static %}
+{% load request_filter %}
+
+{% block content %}
+<main class="main-content offset-md-3 col-md-9 offset-lg-2 col-lg-10">
+  <h2 class="my-4">Send Mechanic Request</h2>
+  
+  {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <strong>{{ message }}</strong>
+    </div>
+    {% endfor %}
+  {% endif %}
+
+<div class="container d-flex justify-content-center align-items-center">
+  <div class="card" style="border-radius: 15px;">
+    <div class="card-body p-2">
+      <div class="text-center">
+        <!-- Mechanic Profile Section -->
+        <div class="card-image">
+            {% if mechanic.profile_pic.url %}
+            <img src="{{mechanic.profile_pic.url}}" alt="Mechanic" class="img-fluid" style="width: 180px; height: 180px; border-radius: 50%;">
+            {% else %}
+            <img src="{% static 'image/mechanic.png' %}" alt="Mechanic" class="img-fluid" style="width: 180px; height: 180px; border-radius: 50%;">
+            {% endif %}
+        </div>
+        <div class="flex-grow-1 ms-3">
+          <h5 class="mb-1">{{ mechanic.user.first_name }} {{ mechanic.user.last_name }}</h5>
+          <h6 class="mb-1">Contact Info:</h6>
+          <div style="line-height:10px;">
+            <p class="mb-2 pb-1">{{ mechanic.mobile }}</p>
+            <p class="mb-2 pb-1">{{ mechanic.user.email }}</p>
+          </div>
+          <h6 class="mb-1">Address:</h6>
+          <div style="line-height:10px;">
+            <p class="mb-2 pb-1">{{ mechanic.state }}</p>
+            <p class="mb-2 pb-1">{{ mechanic.local_government }}</p>
+          </div>
+          <h6 class="mb-3">Services offered:</h6>
+            <p class="mb-2">{{ mechanic.service }}</p>
+        </div>
+      </div>
+
+      <!-- Vehicle Request Form -->
+      <form method="POST">
+        {% csrf_token %}
+        
+
+        <!-- Submit Button -->
+        <section class="submit-container pt-3">
+          {% if mechanic.status == False %}
+          <button type="submit" name="approve" class="btn btn-primary">Approve Mechanic</button>
+          {% else %}
+          {% endif %}
+          {% if manager.is_pro == False and mechanic.my_manager == None%}
+          <button type="submit" name="manage" class="btn btn-primary">Manage Mechanic</button>
+          {% elif manager.is_pro == True %}
+          <b>Become PRO User to manage this mechanic</b>
+          {% else %}
+          {% endif %}
+        </section>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const link = document.querySelector(".pro");
+
+    function updateLinkStyle() {
+      const size = window.innerWidth;
+      if (size <= 768) {
+        link.style.color = "rgba(10, 116, 218, 0.9)";
+        link.style.backgroundColor = "";
+      } else {
+        link.style.backgroundColor = "rgba(10, 116, 218, 0.1)";
+        link.style.color = "rgba(10, 116, 218, 0.9)"; // Reset color if previously set
+      }
+    }
+
+    updateLinkStyle();
+
+    window.addEventListener("resize", updateLinkStyle);
+  });
+</script>
+
+</main>
+
+{% endblock content %}
+

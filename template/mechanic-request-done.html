@@ -1,0 +1,44 @@
+{% extends "mechanicbase.html" %}
+{% load static %}
+{% block content %}
+<style>
+.request-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.request-container div{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+.request-container button, .request-container a{
+    padding: 10px
+}
+</style>
+    <div class="request-container">
+    <h4>Are you sure you are Done with this request? Vehicle Model: {{ accept_detail.vehicle_name }} Problem Description: {{ accept_detail.problem_description }} <br> Customer name: {{accept_detail.driver.user.first_name}} {{accept_detail.driver.user.last_name}} </h4>
+<form method="POST">
+    {% csrf_token %}
+        <input
+            type="hidden"
+            class="form-control"
+            name="eta"
+            value="{{accept_detail.date|timesince}}"
+            placeholder=""
+        />
+    <div>
+    <button class="btn btn-primary" type="submit">Yes I'm Done</button>
+    <a class="btn btn-outline-primary" href="{% url 'mechanic-dashboard'%}">Not Done Yet</a>
+    </div>
+</form>
+
+        
+    </div>
+{% endblock content %}

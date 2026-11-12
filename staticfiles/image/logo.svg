@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 250 150" enable-background="new 0 0 250 150" xml:space="preserve">
+<path fill="#1C75BC" d="M84.7,61.6c0,0-46.1-4-71.5,22.8c0,0,14.2-22.1,50.8-26.8c15.8-8.1,32-18,50.6-20.9
+	c18.7-2.8,50.7,1.7,69.8,8.8c0,0-33.5,12.7-51.5,11.7c13.1-1,29.8-10.7,29.8-10.7c-21.7-7.4-36.3-8.1-52-4.4
+	c-15.7,3.8-40.4,15.8-40.4,15.8C73.5,59.4,84.7,61.6,84.7,61.6z M228.9,55.2c0,0,6.2-1.3,7.9-4.7c-7.8,2.7-35.5,0.6-44.1-2.5
+	c-11.9,7.8-42.3,13.8-66.6,16.7c58.4-4.7,97.9-26.9,109.7,17.5C237.9,66.4,228.9,55.2,228.9,55.2z"/>
+<path fill="#AE2425" d="M43.3,80c3.9-6.8,11.2-11.3,19.5-11.3c8.4,0,15.7,4.6,19.5,11.5h-5.3c-3.6-5.6-9.9-9.2-16.9-9.2
+	C53.2,70.9,47,74.5,43.3,80z"/>
+<path fill="#AE2425" d="M174.3,76.5c4.2-6.8,12.1-11.3,21.1-11.3c9.1,0,17,4.6,21.2,11.5h-5.7c-3.9-5.6-10.7-9.2-18.4-9.2
+	C184.9,67.4,178.2,71,174.3,76.5z"/>
+<g>
+	<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="169.7956" y1="97.4426" x2="184.8835" y2="97.4426">
+		<stop  offset="0" style="stop-color:#FFFFFF"/>
+		<stop  offset="1" style="stop-color:#000000"/>
+	</linearGradient>
+	<path fill="url(#SVGID_1_)" d="M171,104.4c7.8,0,11.5,6.7,11.5,6.7l2.4-27.3c-4,4.4-9,8.6-12.6,8.3c-4.2-0.3-1.9,10.3-1.6,11.8"/>
+	<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="179.1309" y1="97.5815" x2="208.8901" y2="97.5815">
+		<stop  offset="0" style="stop-color:#FFFFFF"/>
+		<stop  offset="1" style="stop-color:#000000"/>
+	</linearGradient>
+	<path fill="url(#SVGID_2_)" d="M198,82.4c5.9,3.8,9.9,9.3,10.7,10.5c0.1,0.2,0.2,0.4,0.1,0.6l0,0c-0.1,0.3-0.4,0.6-0.7,0.5l-10.4-3
+		c-1.5-0.4-3,0.3-3.8,1.9l-0.9,1.8c-1.2,2.4-1.8,5.2-1.7,8.1l0.1,2.1c0,1.8,1.1,3.3,2.6,3.7l10.4,3c0.3,0.1,0.5,0.4,0.4,0.8l0,0
+		c0,0.2-0.2,0.4-0.4,0.5c-1.9,0.6-11.8,3.5-17,1.6c-6.9-2.6-9.6-9.3-7.7-18.4C181.8,86.2,187.4,75.4,198,82.4z"/>
+</g>
+<g>
+	<text transform="matrix(0.8313 0 -0.1633 0.9866 12.4086 108.9588)"><tspan x="0" y="0" fill="#1C75BC" font-family="'MontserratRoman-ExtraBold'" font-size="39.6431">AUTO</tspan><tspan x="110.1" y="0" fill="#939598" font-family="'MontserratRoman-ExtraBold'" font-size="39.6431">AID</tspan></text>
+</g>
+</svg>

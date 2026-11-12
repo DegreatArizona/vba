@@ -1,0 +1,83 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+<style>
+.request-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.request-container div{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+.request-container button, .request-container a{
+    padding: 10px
+}
+</style>
+    <div class="request-container">
+    <h2>Track Your Mechanic</h2>
+        {% if driver.is_pro == True %}
+        <div id="map" style="height: 300px;"></div>  
+        <div><img src="{% static 'image/location.svg' %}"/><h3>Mechanic: {{accept.mechanic.user.first_name}} {{accept.mechanic.user.last_name}}</h3></div>      
+    </div>
+
+<!-- Include Leaflet.js JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    var requestId = {{accept.id}};
+    // Initialize the map with a default view (e.g., Lagos, Nigeria)
+    var map = L.map('map').setView([6.5244, 3.3792], 13);
+
+    // Load the map tiles from OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add a marker for the mechanic
+    var mechanicMarker = L.marker([6.5244, 3.3792]).addTo(map);
+
+    // Function to update mechanic location using AJAX
+    function updateMechanicLocation() {
+        $.ajax({
+            url: '/api/get-mechanic-location/{{accept.id}}/',  // Backend endpoint to get mechanic location
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (data.latitude && data.longitude) {
+                    // Update marker position
+                    mechanicMarker.setLatLng([data.latitude, data.longitude]);
+
+                    // Pan the map to the new location
+                    map.setView([data.latitude, data.longitude], 13);
+
+                    console.log('Location updated:', data);
+                } else {
+                    console.warn('Invalid location data:', data);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching mechanic location:', error);
+            }
+        });
+    }
+
+    // Call the function once to set the initial location
+    updateMechanicLocation();
+
+    // Periodically update the mechanic location every 5 seconds
+    setInterval(updateMechanicLocation, 5000);
+</script>
+        {% else %}
+        <a name="" id="" class="btn btn-outline-primary mt-2 btn-lg" data-bs-target="#modalId" data-bs-toggle="modal" role="button"
+        >Go Pro <i class="fa-solid fa-crown" aria-hidden="true"></i></a>
+        {% endif %}
+
+{% endblock content %}

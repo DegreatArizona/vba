@@ -1,0 +1,264 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanic Manager Register|| Auto Aid - Fast & Reliable Vehicle Breakdown Assistance | Available 24/7</title>
+    <link rel="shortcut icon" href="{% static 'image/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" type="image/x-icon" href="{% static 'image/favicon.ico' %}">
+    <meta name="keywords" content="vehicle breakdown assistance, roadside assistance, emergency car repair, car breakdown service, certified mechanics, mobile car repair, 24/7 roadside help, tire change service, jump-start service, emergency towing, car repair near me, roadside mechanic, vehicle repair assistance, driver support, affordable car repair, quick car assistance">
+    <meta name="description" content="Find reliable, real-time roadside assistance anytime, anywhere with our vehicle breakdown support service. Connect instantly with skilled mechanics, ensuring fast and effective help when you need it the most.">
+    <!-- fontawesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+      <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: rgba(10, 116, 218, 0.9);
+        }
+
+        h2 {
+            margin-top: 20px;
+            color: #555;
+            border-bottom: 2px solid rgba(10, 116, 218, 0.9);
+            padding-bottom: 5px;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        form p {
+            margin-bottom: 15px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+        }
+
+        button[type="submit"] {
+            background-color: rgba(10, 116, 218, 0.9);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: rgba(10, 116, 218, 0.7);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        label{
+            display:block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <h1>Register as Mechanic Manager</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <h2>Account Information</h2>
+            {{ user_form.as_p }}
+
+            <h2>Manager Details</h2>
+            <div class="mb-3">
+            <label for="state">State</label>                                
+            <select name="state" class="form-control" required onchange="selectLGA(this)" id="state">
+            <option value="" selected="selected">- Select State -</option>
+            </select>
+            </div>
+            <div class="mb-3">
+            <label for="lga">Local Government</label>
+            <select name="local_government" required class="form-control" id="lga">
+            <option>Select LGA</option>
+            </select>
+            </div>
+            <div class="mb-3">
+                <label for="id_address" class="form-label">Address</label>
+                {{ manager_form.address }}
+            </div>
+            <div class="mb-3">
+                <label for="id_profile_pic" class="form-label">Profile Picture</label>
+                <input
+                        type="file"
+                        class="form-control"
+                        name="profile_pic"
+                        id="id_profile_pic"
+                        placeholder=""
+                        required
+                    />
+            </div>
+            <div class="mb-3">
+                <label for="id_business" class="form-label">Business or Company name</label>
+                {{ manager_form.business }}
+            </div>
+            <div class="mb-3">
+                <label for="id_gender" class="form-label">Gender</label>
+                {{ manager_form.gender }}
+            </div>
+            <div class="mb-3">
+                <label for="mobile" class="form-label">Phone Number</label>
+                <input
+                        type="tel"
+                        class="form-control"
+                        name="mobile"
+                        id="mobile"
+                        value="+234"
+                        placeholder=""
+                        required
+                    />
+            </div>
+            <h2>Guarantor Details</h2>
+            <div class="mb-3">
+                <label for="id_guarantor_name" class="form-label">Guarantor Name</label>
+                {{ manager_form.guarantor_name }}
+            </div>
+            <div class="mb-3">
+                <label for="id_guarantor_mobile" class="form-label">Guarantor Phone Number</label>
+                {{ manager_form.guarantor_mobile }}
+            </div>
+            <div class="mb-3">
+                <label for="id_guarantor_email" class="form-label">Guarantor Email</label>
+                {{ manager_form.guarantor_email }}
+            </div>
+            <div class="mb-3">
+                <label for="id_guarantor_pic" class="form-label">Guarantor Picture</label>
+                    <input
+                        type="file"
+                        class="form-control"
+                        name="guarantor_pic"
+                        id="id_guarantor_pic"
+                        placeholder=""
+                        required
+                    />
+            </div>
+            <h2>Guarantor 2 Details</h2>
+            <div class="mb-3">
+                <label for="id_guarantor2_name" class="form-label">Guarantor 2 Name</label>
+                {{ manager_form.guarantor2_name }}
+            </div>
+            <div class="mb-3">
+                <label for="id_guarantor2_mobile" class="form-label">Guarantor 2 Phone Number</label>
+                {{ manager_form.guarantor2_mobile }}
+            </div>
+            <div class="mb-3">
+                <label for="id_guarantor2_email" class="form-label">Guarantor 2 Email</label>
+                {{ manager_form.guarantor2_email }}
+            </div>
+            <div class="mb-3">
+                <label for="id_guarantor2_pic" class="form-label">Guarantor 2 Picture</label>
+                <input
+                        type="file"
+                        class="form-control"
+                        name="guarantor2_pic"
+                        id="id_guarantor2_pic"
+                        placeholder=""
+                        required
+                    />
+            </div>
+
+            <button type="submit">Register</button>
+        </form>
+        <div class="footer">
+            <p>&copy; {{ year }} Auto Aid. All Rights Reserved.</p>
+        </div>
+    </div>
+    <script>
+    //Fetch all States
+    fetch('https://nga-states-lga.onrender.com/fetch')
+            .then((res) => res.json())
+            .then((data) => {
+            var x = document.getElementById("state");
+                for (let index = 0; index < Object.keys(data).length; index++) {
+                    var option = document.createElement("option");
+                    option.text = data[index];
+                    option.value = data[index];
+                    x.add(option);
+                } 
+                });
+    //Fetch Local Goverments based on selected state
+    function selectLGA(target) {
+        var state = target.value;
+            fetch('https://nga-states-lga.onrender.com/?state='+state)
+            .then((res) => res.json())
+            .then((data) => {
+                var x = document.getElementById("lga");
+                    
+                var select = document.getElementById("lga");
+                var length = select.options.length;
+                for (i = length-1; i >= 0; i--) {
+                    select.options[i] = null;
+                }
+                for (let index = 0; index < Object.keys(data).length; index++) {
+                        var option = document.createElement("option");
+                        option.text = data[index];
+                        option.value = data[index];
+                        x.add(option);
+                    } 
+                });
+        }
+        
+</script>
+</body>
+</html>

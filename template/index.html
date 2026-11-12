@@ -1,0 +1,685 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+    <head>
+        <title>Auto Aid - Fast & Reliable Vehicle Breakdown Assistance | Available 24/7</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <meta name="csrf-token" content="{{ csrf_token }}">
+        <link rel="manifest" href="{% static 'manifest.json' %}">
+        <meta name="google-site-verification" content="SpneKSxrwXkhhfHJUFk78t4l5kktChiIZRSfysNjQq4" />
+        <link rel="shortcut icon" href="{% static 'image/favicon.ico' %}" type="image/x-icon">
+        <link rel="icon" type="image/x-icon" href="{% static 'image/favicon.ico' %}">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/components/testimonials/testimonial-3/assets/css/testimonial-3.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        
+        <meta name="keywords" content="vehicle breakdown assistance, roadside assistance, emergency car repair, car breakdown service, certified mechanics, mobile car repair, 24/7 roadside help, tire change service, jump-start service, emergency towing, car repair near me, roadside mechanic, vehicle repair assistance, driver support, affordable car repair, quick car assistance">
+        <meta name="description" content="Find reliable, real-time roadside assistance anytime, anywhere with our vehicle breakdown support service. Connect instantly with skilled mechanics, ensuring fast and effective help when you need it the most.">
+        <meta name="author" content="Ephraim Arinze - DegreatArinzona">
+        <meta name="robots" content="index, follow">
+        <meta property="og:title" content="Auto Aid - Fast & Reliable Vehicle Breakdown Assistance | Available 24/7">
+        <meta property="og:description" content="Get instant roadside assistance with trusted mechanics for emergency repairs, tire changes, and jump-starts—available anytime, anywhere.">
+        <meta property="og:image" content="{% static 'image/favicon.ico' %}">
+        <meta property="og:url" content="https://autoaid.com.ng">
+        <meta property="og:site_name" content="Auto Aid">
+        <meta property="og:type" content="website">
+        <meta name="twitter:card" content="{% static 'image/favicon.ico' %}">
+        <meta name="twitter:title" content="Auto Aid - Fast & Reliable Vehicle Breakdown Assistance | Available 24/7">
+        <meta name="twitter:description" content="Trusted roadside mechanics for quick repairs, tire changes, and jump-starts—get help anytime, anywhere.">
+        <meta name="twitter:image" content="{% static 'image/favicon.ico' %}">
+        <!-- Swiper CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+        <!-- Bootstrap CSS v5.2.1 -->
+         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+        <link rel="stylesheet" href="{% static 'css/index.css' %}">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.0/dist/js.cookie.min.js"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EH456DNPBC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-EH456DNPBC');
+    </script>
+
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "3c4e8766-04e3-45f3-aaa8-bd5550e9e8c6",
+        });
+      });
+    </script>
+
+    </head>
+
+    <body>
+        <header>
+            <nav
+                class="navbar navbar-expand-sm navbar-light bg-light"
+            >
+                <div class="container">
+                    <a class="navbar-brand" data-aos="fade-right" href="/"><img width="100px" src="{% static 'image/logo.svg' %}" class="img-fluid img-brand rounded-top" alt="LOGO"/></a>
+                    <button
+                        class="navbar-toggler d-lg-none"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapsibleNavId"
+                        aria-controls="collapsibleNavId"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation"
+                    >
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="collapsibleNavId">
+                        <ul class="navbar-nav me-auto mt-2 mt-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" aria-current="page"
+                                    >Home
+                                    <span class="visually-hidden">(current)</span></a
+                                >
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#how">How It Works</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#plan">Pricing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="driver-request-service">Request Assistant</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="manager-register">Become a Manager</a>
+                            </li>
+                        </ul>
+                        <a class="btn" href="/login" role="button">Login</a>
+                        <a class="btn btn-outline-primary" href="/register" role="button">Sign Up</a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <main class="container">
+            <div class="hero-section">
+                <div class="container">
+                    <div class="row">
+                        <div class="hero-head col-md-7" data-aos="fade-right">
+                          <h2>Get Help Anytime, Anywhere!</h2>
+                          <p>Fast and reliable vehicle breakdown assistance with just a few clicks.</p>
+                          <div class="hero-btn">
+                            <a id="" class="btn btn-primary" href="driver-request-service" role="button">Request Assistance</a>
+                            
+                      </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="container hero-sub-section" data-aos="fade-left">    
+                               <img src="{% static 'image/hero.png' %}" alt="right image">
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            <div>
+            <marquee behavior="scroll" direction="left" data-aos="fade-right">
+   <img src="{% static "image/ferrari.png" %}" width="80" height="50" alt="ferrari" />
+    <img src="{% static "image/ford.png" %}" width="80" height="50" alt="ford" />
+   <img src="{% static "image/lambo.png" %}" width="80" height="50" alt="lambo" />
+   <img src="{% static "image/mahindra.png" %}" width="80" height="50" alt="mahindra" />
+   <img src="{% static "image/tvs.png" %}" width="80" height="50" alt="tvs" />
+   <img src="{% static "image/bg4.png" %}" width="80" height="50" alt="repair" />
+   <img src="{% static "image/tata.png" %}" width="80" height="50" alt="tata" />
+   <img src="{% static "image/hero1.png" %}" width="80" height="50" alt="hero" />
+   <img src="{% static "image/rolls.png" %}" width="80" height="50" alt="rolls" />
+   <img src="{% static "image/suzuki.png" %}" width="80" height="50" alt="suzuki" />
+ </marquee>
+            </div>
+            <div class="how" id="how">
+                <div class="how-head" data-aos="fade-down">
+                    <h2>How it Works</h2>
+                    <p>Our streamlined process ensures you get the assistance you need quickly and easily, no matter where you are!</p>
+                </div>
+                <div class="how-body">
+                    <div class="container">
+                        <div class="row justify-content-center align-items-center data-aos="fade-left" g-2">
+                            <div class="col-md col-lg">
+                              <div class="card how-card">
+                                <img src="{% static 'image/mobile-angled.svg' %}" class="card-img-top" alt="">
+                                <div class="card-body">
+                                    <h5 class="card-title">Request Assistance</h5>
+                                    <p class="card-text">Use our website to request help with just a few taps. Enter your location and the type of service you need.</p>
+                                </div>
+                             </div>
+                        </div>
+                            <div class="col-md col-lg">
+                              <div class="card how-card" >
+                                <img src="{% static 'image/tow-truck.svg' %}" class="card-img-top" alt="">
+                                <div class="card-body">
+                                    <h5 class="card-title">Get Help</h5>
+                                    <p class="card-text">Once your request is received, a nearby service provider will be dispatched to your location. You can track their arrival in real-time.</p>
+                                </div>
+                             </div>
+                        </div>
+                            <div class="col-md col-lg">
+                              <div class="card how-card">
+                                <img src="{% static 'image/thumbs-up.svg' %}" class="card-img-top" alt="">
+                                <div class="card-body">
+                                    <h5 class="card-title">Rate Our Service</h5>
+                                    <p class="card-text">After your service is completed, let us know how we did! Your feedback help us improve our services and ensures you receive the best experience.</p>
+                                </div>
+                             </div>
+                        </div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="feature" id="feature">
+                <div class="feature-head" data-aos="fade-up">
+                    <h2>Our Features</h2>
+                    <p>Discover the powerful features designed to connect drivers with reliable service providers, ensuring you get the help you need.</p>
+                </div>
+            </div>
+            <div class="feature-body">
+                <div class="container">
+                    <div class="row justify-content-center align-items-center data-aos="fade-right" g-2">
+                        <div class="col-md col-lg">
+                          <div class="card feature-card">
+                            <img src="{% static 'image/instante.png' %}" class="card-img-top" alt="">
+                            <div class="card-body">
+                                <h5 class="card-title">Instant Service Matching</h5>
+                                <p class="card-text">Quickly connect with nearby service providers based on your location, ensuring timely assistance when you need it most.</p>
+                            </div>
+                         </div>
+                    </div>
+                        <div class="col-md col-lg">
+                          <div class="card feature-card">
+                            <img src="{% static 'image/tracking.png' %}" class="card-img-top" alt="">
+                            <div class="card-body">
+                                <h5 class="card-title">Real-Time Tracking</h5>
+                                <p class="card-text">Track the arrival of your service provider in real-time, so you know exactly when to expect help at your location.</p>
+                            </div>
+                         </div>
+                    </div>
+                        <div class="col-md col-lg">
+                          <div class="card feature-card">
+                            <img src="{% static 'image/service.png' %}" class="card-img-top" alt="">
+                            <div class="card-body">
+                                <h5 class="card-title">Multi-Service Options</h5>
+                                <p class="card-text">Choose from a range of services offered by the service providers, including towing, tire changes, fuel delivery, and more.</p>
+                            </div>
+                         </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="plan" id="plan">
+              <div class="plan-head" data-aos="fade-left">
+                <h2>Choose Your Plan</h2>
+                <p>Whether you’re a driver in need of quick help or a mechanic looking for new opportunities, we’ve got a plan that fits your needs. Select a plan and get started.</p>
+              </div>
+              <div class="slide-container swiper plan-body">
+              <div class="slide-content" data-aos="fade-right">
+                <div class="card-wrapper swiper-wrapper">
+                  <div class="card swiper-slide">
+                    <div class="card-title">
+                      <h2>Free</h2>
+                      <p>For Alll Users</p>
+                    </div>
+                    <div class="card-body">
+                      <span>₦0</span><span>/month</span>
+                    </div>
+                    <div class="card-content">
+                      <h2 class="name">What you get:</h2>
+                      <ul class="description">
+                        <li>Access to nearby Mechanics.</li>
+                        <li>Real-Time tracking for one breakdown request per month.</li>
+                        <li>Access to approvig mechanics</li>
+                      </ul>
+                      <button class="button" onclick="window.location.href='{% url 'login' %}'">Get Started</button>
+                    </div>
+                  </div>
+                  <div class="card swiper-slide">
+                    <div class="card-title">
+                      <h2>Basic</h2>
+                      <p>For Managers</p>
+                    </div>
+                    <div class="card-body">
+                      <span>₦8,000</span><span>/month</span>
+                    </div>
+                    <div class="card-content">
+                      <h2 class="name">What you get:</h2>
+                      <ul class="description">
+                        <li>Unlimited access to mechanics.</li>
+                        <li>Real-time tracking for unlimited breakdown requests.</li>
+                        <li>Full service options (e.g., towing, diagnostics)</li>
+                      </ul>
+                      <button class="button" onclick="window.location.href='{% url 'manager-dashboard' %}'">Get Started</button>
+                    </div>
+                  </div>
+                  <div class="card swiper-slide">
+                    <div class="card-title">
+                      <h2>Pro</h2>
+                      <p>For Mechanics</p>
+                    </div>
+                    <div class="card-body">
+                      <span>₦10,000</span><span>/month</span>
+                    </div>
+                    <div class="card-content">
+                      <h2 class="name">What you get:</h2>
+                      <ul class="description">
+                        <li>Access to drivers in your area</li>
+                        <li>Customer ratings and reviews</li>
+                        <li>Priority matching for breakdown requests</li>
+                      </ul>
+                      <button class="button"  onclick="window.location.href='{% url 'mechanic-dashboard' %}'">Get Started</button>
+                    </div>
+                  </div>
+                  <div class="card swiper-slide">
+                    <div class="card-title">
+                      <h2>Premium</h2>
+                      <p>For Drivers</p>
+                    </div>
+                    <div class="card-body">
+                      <span>₦14,000</span><span>/month</span>
+                    </div>
+                    <div class="card-content">
+                      <h2 class="name">What you get:</h2>
+                      <ul class="description">
+                        <li>Featured listing for your mechanic services</li>
+                        <li>Advanced analytics and reporting</li>
+                        <li>Priority access to high-value breakdowns</li>
+                      </ul>
+                      <button class="button"  onclick="window.location.href='{% url 'driver-dashboard' %}'">Get Started</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="swiper-button-next swiper-navBtn"></div>
+              <div class="swiper-button-prev swiper-navBtn"></div>
+              <div class="swiper-pagination"></div>
+            </div>
+            </div>
+           
+            <div class="test-section" id="test" data-aos="fade-right">
+                <div class="test-head" data-aos="fade-down">
+                  <h2>What Our Clients Say About Us</h2>
+                  <p>Transform your brand with our innovative digital solutions that captivate and engage your audience.</p>
+              </div>
+                <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                  <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                  </div>
+                  <div class="carousel-inner">
+                    <div class="carousel-item active">
+                      <div class="card border-0 border-bottom border-warning shadow-sm">
+                        <div class="card-body p-4 p-xxl-5">
+                          <figure>
+                            <img class="img-fluid rounded rounded-circle mb-4 border border-5" loading="lazy" src="{% static 'image/user.png' %}" alt="Luna John">
+                            <figcaption>
+                              <div class="bsb-ratings text-warning mb-3" data-bsb-star="5" data-bsb-star-off="0"></div>
+                              <blockquote class="bsb-blockquote-icon mb-4">This platform has helped me find more customers and grow my business. It’s so easy to use.</blockquote>
+                              <h4 class="mb-2">Michael Nwanze</h4>
+                              <h5 class="fs-6 text-secondary mb-0">Mechanic</h5>
+                            </figcaption>
+                          </figure>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="carousel-item">
+                      <div class="card border-0 border-bottom border-warning shadow-sm">
+                        <div class="card-body p-4 p-xxl-5">
+                          <figure>
+                            <img class="img-fluid rounded rounded-circle mb-4 border border-5" loading="lazy" src="{% static 'image/user.png' %}" alt="Luke Reeves">
+                            <figcaption>
+                              <div class="bsb-ratings text-warning mb-3" data-bsb-star="5" data-bsb-star-off="0"></div>
+                              <blockquote class="bsb-blockquote-icon mb-4">I was stranded on the highway but within minutes, I was connected to a mechanic nearby. This platform was a lifesaver! Highly recommend.</blockquote>
+                              <h4 class="mb-2">Gift Odunsi</h4>
+                              <h5 class="fs-6 text-secondary mb-0">Driver</h5>
+                            </figcaption>
+                          </figure>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="carousel-item">
+                      <div class="card border-0 border-bottom border-warning shadow-sm">
+                        <div class="card-body p-4 p-xxl-5">
+                          <figure>
+                            <img class="img-fluid rounded rounded-circle mb-4 border border-5" loading="lazy" src="{% static 'image/user.png' %}" alt="Mark Smith">
+                            <figcaption>
+                              <div class="bsb-ratings text-warning mb-3" data-bsb-star="4" data-bsb-star-off="1"></div>
+                              <blockquote class="bsb-blockquote-icon mb-4">I ran out of fuel on a remote road, within 15 minutes, help was on the way. The whole process was smooth and stress-free.</blockquote><h4 class="mb-2">Segun Olabayo</h4>
+                              <h5 class="fs-6 text-secondary mb-0">Driver</h5>
+                            </figcaption>
+                          </figure>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                    <!-- <span class="carousel-control-prev-icon" aria-hidden="true" ></span> -->
+                    <i class="fa fa-arrow-left" aria-hidden="true" style="border: 1px solid #e3811d; border-radius: 50px; color: black; padding: 10px;"></i>
+                    <span class="visually-hidden">Previous</span>
+                  </button>
+                  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                    <!-- <span class="carousel-control-next-icon" aria-hidden="true"></span> -->
+                    <i class="fa fa-arrow-right" aria-hidden="true" style="border: 1px solid #e3811d; border-radius: 50px; color: black; padding: 10px;"></i>
+                    <span class="visually-hidden">Next</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="faq" data-aos="fade-left">
+                <div class="faq-head" data-aos="fade-down">
+                  <h2>Frequently Asked Questions</h2>
+                  <p>Have questions about how our platform works? Here are some of the most frequently asked questions.</p>
+                </div>
+                <div class="faq-body">
+                  <div class="accordion" id="sleekAccordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                    How can I find a mechanic near me?
+                                                </button>
+                                        </h2>
+                                        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#sleekAccordion">
+                                            <div class="accordion-body">
+                                                After signing up, simply input your location or use the GPS feature to allow the platform to automatically find available mechanics close to you. You’ll get a list of options along with their reviews, ratings, and estimated arrival times.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                    What services can I request through the platform?
+                                                </button>
+                                        </h2>
+                                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#sleekAccordion">
+                                            <div class="accordion-body">
+                                                The platform offers a variety of services, including towing, tire changes, battery jumpstarts, fuel delivery, and more. Depending on the mechanic’s expertise, you can also request more complex services like diagnostics or engine repairs.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                                    Is there a fee to use the platform?
+                                                </button>
+                                        </h2>
+                                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#sleekAccordion">
+                                            <div class="accordion-body">
+                                                 For drivers, there is a free plan with limited features, while premium services like unlimited requests or real-time tracking are available for a small fee. Mechanics can choose from different subscription plans, starting with a basic plan and moving up to premium options with added perks.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                                    How can I sign up as a mechanic?
+                                                </button>
+                                        </h2>
+                                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#sleekAccordion">
+                                            <div class="accordion-body">
+                                                Mechanics can sign up by selecting the “Join as a Mechanic” option, filling out the required details, and submitting necessary certifications. Once approved, you’ll start receiving service requests from drivers in your area.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                                    Is my personal information secure?
+                                                </button>
+                                        </h2>
+                                        <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#sleekAccordion">
+                                            <div class="accordion-body">
+                                                Yes, we take your privacy seriously. All personal information is securely stored and protected, and we use advanced encryption to ensure that your data is safe when communicating through the platform.
+                                            </div>
+                                        </div>
+                                    </div>
+                  </div>
+                </div>
+              </div>
+              
+        </main>
+        <footer class="footer mt-auto">
+    <div class="container">
+      <div class="row">
+        <!-- Logo and Description -->
+        <div class="col-md-4">
+          <a class="navbar-brand" data-aos="fade-right" href="/"><img width="100px" src="{% static 'image/favicon.ico' %}" class="img-fluid img-brand rounded-top" alt="LOGO"/></a>
+          <p>Our platform connects drivers with nearby mechanics in real time, offering quick and reliable roadside assistance anytime, anywhere.</p>
+          <div class="social-icons">
+  <a href="https://www.facebook.com" target="_blank" aria-label="Facebook">
+    <i class="fab fa-facebook-f"></i>
+  </a>
+  <a href="https://www.twitter.com" target="_blank" aria-label="Twitter">
+    <i class="fab fa-twitter"></i>
+  </a>
+  <a href="https://www.youtube.com" target="_blank" aria-label="YouTube">
+    <i class="fab fa-youtube"></i>
+  </a>
+  <a href="https://www.instagram.com" target="_blank" aria-label="Instagram">
+    <i class="fab fa-instagram"></i>
+  </a>
+  <a href="https://www.linkedin.com" target="_blank" aria-label="LinkedIn">
+    <i class="fab fa-linkedin-in"></i>
+  </a>
+</div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div class="col-md-2">
+          <h5>Quick Links</h5>
+          <ul class="list-unstyled">
+            <li><a href="#">Home</a></li>
+            <li><a href="#how">How it Works</a></li>
+            <li><a href="#feature">Features</a></li>
+            <li><a href="#plan">Pricing Plans</a></li>
+            <li><a href="#test">Testimonials</a></li>
+          </ul>
+        </div>
+        
+        <!-- Support Links -->
+        <div class="col-md-2">
+          <h5>Support</h5>
+          <ul class="list-unstyled">
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <!-- Newsletter Subscription -->
+        <div class="col-md-4">
+          <h5>Newsletter</h5>
+          <p>Subscribe to our newsletter and unlock a world of exclusive benefits. Be the first to know about our special promotions, and exciting updates.</p>
+          <form class="d-flex">
+            <input type="email" class="form-control newsletter-input" placeholder="Enter your email">
+            <button class="btn btn-primary ms-2" type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Footer Bottom -->
+      <div class="row mt-4">
+        <div class="col text-center">
+          <p class="mb-0">© 2024 All rights reserved</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+         <!-- chatbot -->
+    <div class="chat-bot">
+      <button type="button" class="chat-bot-btn">
+        <i class="fa fa-robot"></i>
+      </button>
+      <section class="chat-bot-container hide">
+        <div class="chat-bot-header">
+          AUTOAID TOUR
+          <div class="voice-container">
+            <button id="trigger-select" title="select the voice of your choice">
+              <i class="fa fa-person-circle-plus"></i>
+            </button>
+            <select id="voice"></select>
+          </div>
+        </div>
+        <div class="chat-bot-body accordion" id="chatAccordion">
+          <!-- General Questions -->
+          <div class="question-category general-questions show"></div>
+          <!-- Driver-Related Questions -->
+          <div class="question-category driver-questions"></div>
+          <!-- Mechanic-RelatedQuestions -->
+          <div class="question-category mechanic-questions"></div>
+          <!-- Payment-and-Pricing-Related Questions -->
+          <div class="question-category payment-questions"></div>
+          <div class="question-category safety-questions"></div>
+          <div class="question-category other-questions"></div>
+        </div>
+        <div class="chat-bot-footer">
+          <button id="general" class="question-category-btn active">
+            <i class="fa fa-home"></i>
+          </button>
+          <button id="driver" class="question-category-btn">
+            <i class="fa fa-car"></i>
+          </button>
+          <button id="mechanic" class="question-category-btn">
+            <i class="fa fa-screwdriver-wrench"></i>
+          </button>
+          <button id="payment" class="question-category-btn">
+            <i class="fa fa-sack-dollar"></i>
+          </button>
+          <button id="safety" class="question-category-btn">
+            <i class="fa fa-user-shield"></i>
+          </button>
+          <button id="other" class="question-category-btn">
+            <i class="fa fa-person-circle-question"></i>
+          </button>
+        </div>
+      </section>
+    </div>
+
+        
+        <!-- Swiper JS -->
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <!-- Bootstrap JavaScript Libraries -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
+        ></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous"
+        ></script>
+
+       <script>
+           document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // Set default headers for all AJAX requests
+    if (csrfToken) {
+        $.ajaxSetup({
+            headers: { 'X-CSRFToken': csrfToken }
+        });
+    }
+});
+       </script>
+        <script>
+          if ('serviceWorker' in navigator) {
+          navigator.serviceWorker
+              .register('/service-worker.js')
+              .then(() => console.log('Service Worker Registered'))
+              .catch((error) => console.error('Service Worker Error', error));
+      }
+
+      </script>
+      
+        <script src="{% static 'js/index.js' %}"></script>
+        <script src="{% static 'js/chatbot.js' %}"></script>
+        <script src="{% static 'js/questions.js' %}"></script>
+        
+        <script type="application/ld+json">
+          {
+            "@context": "http://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Auto Aid",
+            "description": "Our vehicle breakdown assistance service connects you with certified mechanics for emergency roadside help, including tire changes, jump-starts, and on-the-spot repairs.",
+            "url": "https://autoaid.com.ng",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Awka",
+              "addressRegion": "Anambra State",
+              "postalCode": "417033",
+              "streetAddress": "Ifite"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+2348107466823",
+              "contactType": "Contact Line"
+            }
+          }
+        </script>
+            <!-- Floating Chat Button -->
+
+    {% comment %} <div>
+          <button id="chat-toggle" class="btn btn-primary chat-toggle-btn">
+        <i class="bi bi-robot"></i>
+      </button>
+
+
+      <div id="chatbox" class="chatbox" style="display:none;">
+
+        <div class="chatbox-header">
+
+            <span>AI Assistant <i class="bi bi-robot"></i></span>
+
+            <button id="chat-close" class="btn-close"></button>
+
+        </div>
+
+        <div id="chat-response" class="chat-response"></div>
+
+        <div class="chat-input">
+
+            <textarea id="prompt" class="form-control outline-none" placeholder="Type your message..." rows="2"></textarea>
+
+            <button id="send-message" class="btn btn-primary"><i class="fa fa-send"></i></button>
+
+        </div>
+
+      </div>
+
+    </div> {% endcomment %}
+
+    </body>
+</html>

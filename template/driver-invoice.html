@@ -1,0 +1,434 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+<!-- Step 1: Add the Korapay Pay-in Script -->
+    <div id="invoiceModal" class="modals">
+<style>
+    :root {
+    --blue: rgba(10, 116, 218, 0.90);
+    --dark: rgba(33, 33, 33, 0.80);
+    }
+
+    .modal {
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        background-color: rgba(0, 0, 0, 0.4); 
+    }
+
+    .modal-contents {
+        background-color: white;
+        margin: 15% auto; 
+        padding: 0; 
+        border: 1px solid #333232;
+        width: 80%; 
+        border-radius: 8px;
+    }
+
+    .puch-info #invoice {
+        color: var(--blue);
+        font-weight: bolder;
+        text-transform: uppercase;
+        margin-bottom: 0;
+    }
+
+    .puch-info-gen-container {
+        background-color: #0A74DA1A;
+        color: var(--dark);
+        width: 100%; 
+        height: auto; 
+        border-bottom-left-radius: 21px;
+        border-bottom-right-radius: 21px;
+        display: flex;
+        justify-content: space-between;
+        padding: 20px;
+        flex-wrap: wrap;
+    }
+
+    .puch-info-container-1,
+    .puch-info-container-2 {
+        width: 50%; 
+        margin-top: 10px;
+    }
+
+    .puch-info-container-1 {
+        text-align: left; 
+    }
+
+    .puch-info-container-2 {
+        text-align: right; 
+    }
+
+    .puch-info {
+        margin: 10px 0;
+    }
+
+    .puch-info p {
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+
+    .puch-info #name, 
+    .puch-info #issued-date, 
+    .puch-info #due-date, 
+    .puch-info #invoice-no, 
+    .puch-info #address, 
+    .puch-info #due-date {
+        font-weight: bold; 
+        color: var(--dark);
+    }
+
+    .description {
+        width: 90%;
+        height: auto; 
+        display: flex;
+        flex-direction: row;
+        padding: 10px;
+        margin: 10px auto;
+        color: var(--dark);
+    }
+
+    .description div {
+        margin-bottom: 10px;
+        margin-left: 11px;
+    }
+
+    .description div h3 {
+        margin-bottom: 20px;
+    }
+
+
+    .proceed {
+        display: flex;
+        flex-direction: row; /* Ensure buttons stack vertically */
+        justify-content: flex-end; /* Align buttons to the bottom */
+        gap: 10px; 
+        margin: 10px 20px;
+    }
+    .payment-status {
+        display: flex;
+        align-items: center;
+        justify-content:center;
+        gap: 10px;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 500;
+        border-radius: 10.55px;
+        padding: 4px;
+    }
+    .payment-success {
+        background: rgba(67, 160, 71, 0.20);
+        color: rgba(67, 160, 71, 0.90);
+    }
+    .payment-fail {
+        color: rgba(160, 67, 67, 0.9);
+        background: rgba(160, 67, 67, 0.2);
+    }
+    .payment-status i {
+        font-size: 16px;
+    }
+    .proceed button {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: 1px solid var(--blue); 
+        border-radius: 5px;
+        font-weight: bold;
+        background: var(--blue);
+        margin-bottom: 10px; 
+        font-size: 17px; 
+    }
+
+    .proceed #makePaymentBtn {
+        color: white;
+        background-color: var(--blue);
+    }
+
+    .proceed .close {
+        color: var(--blue);
+        background-color: white;
+    }
+
+    .proceed .close:hover, 
+    .proceed #makePaymentBtn:hover {
+        background-color: var(--blue);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .modal-contents {
+            width: 90%; 
+        }
+
+        .puch-info-gen-container {
+            padding: 15px; 
+        }
+
+        .puch-info-container-1,
+        .puch-info-container-2 {
+            width: 50%; 
+        }
+
+        .description {
+            font-size: 0.65rem; 
+        }
+
+        .proceed {
+            flex-direction: row; 
+            align-items: flex-end; 
+        }
+    }
+
+</style>
+       <main>
+       {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="modal-contents">
+            <div class="puch-info-gen-container">
+                <div class="puch-info-container-1">
+                    <div class="puch-info">
+                        <a class="navbar-brand" href="/"><img width="100px" src="{% static 'image/logo.svg' %}" class="img-fluid img-brand rounded-top" alt="LOGO"/></a>
+                        <h1 id="invoice">Invoice</h1>
+                    </div>
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Bill To</p>
+                        <p id="name">{{ request.driver.user.first_name }} {{ request.driver.user.last_name }}</p>
+                    </div>
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Address/Contact Info</p>
+                        <p id="address">{{ request.location }}</p>
+                        <p id="address">{{ request.mobile }}</p>
+                        <p id="address">{{ request.driver.user.email }}</p>
+                    </div>
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Payment To</p>
+                        <p id="name">{{ request.mechanic.user.first_name }} {{ request.mechanic.user.last_name }}</p>
+                    </div>
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Address/Contact Info</p>
+                        <p id="address">{{ request.mechanic_location }}</p>
+                        <p id="address">{{ request.mechanic_mobile }}</p>
+                        <p id="address">{{ request.mechanic.user.email }}</p>
+                    </div>
+                </div>
+                <div class="puch-info-container-2">
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Invoice No</p>
+                        <p id="invoice-no">#INV{{ request.id }}</p>
+                    </div>
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Issued On</p>
+                        <p id="issued-date">{{ request.date|date:"F j, Y" }}</p>
+                    </div>
+                    
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Payment Due</p>
+                        <p id="due-date">{{ request.date|date:"F j, Y" }}</p>
+                    </div>
+
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Payment Method</p>
+                        <p id="due-date">{{request.method}}</p>
+                    </div>
+
+                    <div class="puch-info">
+                        <p style="color:rgba(10, 116, 218, 0.90); font-weight:bold;">Transanction Ref</p>
+                        <p id="due-date">{{request.transaction_reference}}</p>
+                    </div>
+                    
+                </div>
+            </div>
+                <div class="table-responsive description">
+                    <table class="table table-borderless border-0" >
+                        <thead>
+                            <tr>
+                                <th scope="col">Service</th>
+                                <th scope="col">Vehicle Info</th>
+                                <th scope="col">Fee</th>
+                                <th scope="col">Tax</th>
+                                <th scope="col">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="">
+                                <td>{{ request.category }} <br> {{request.problem_description}} </td>
+                                <td>{{ request.vehicle_name }} <br> {{ request.vehicle_no }}</td>
+                                <td>₦{{ request.cost }}</td>
+                                <td>₦{{ request.tax }}</td>
+                                <td>₦{{total}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="puch-info">
+                        {% if request.invoice == 'Paid' %}
+                <div id="due-date" class="payment-status payment-success">
+                    <i class="fa fa-check-circle"></i>
+                    <span>{{request.invoice}}</span>
+                        </div>
+                    {% elif request.invoice == 'Cancelled' %}
+                        <div id="due-date" class="payment-status payment-fail">
+                            <i class="fa fa-times-circle"></i>
+                            <span>{{request.invoice}}</span>
+                        </div>
+                    {% else %}
+                    <div id="due-date" class="payment-status payment-fail">
+                            <i class="fa fa-spinner"></i>
+                            <span>{{request.invoice}}</span>
+                        </div>
+                    {% endif %}
+                    </div>
+            <div class="proceed">
+            {% if request.invoice == 'Pending' %}
+             <!-- Step 2: Create Payment Form with "Pay Mechanic" Button -->
+                <form id="paymentForm">
+                    <button id="makePaymentBtn" type="button" onclick="payMechanic()">Pay With Card</button>
+                </form>
+               <!-- Modal trigger button -->
+                <button
+                    type="button"
+                    class="close btn-lg"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalId"
+                >
+                    Pay From Balance
+                </button>
+            {% else %}
+            {% endif %}
+            </div>
+        </div>
+    </div>
+       </main>
+       
+       <!-- Modal Body -->
+       <!-- if you want to close by clicking outside the modal, delete the last endpoint:data-bs-backdrop and data-bs-keyboard -->
+       <div
+        class="modal fade"
+        id="modalId"
+        tabindex="-1"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        
+        role="dialog"
+        aria-labelledby="modalTitleId"
+        aria-hidden="true"
+       >
+        <div
+            class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm"
+            role="document"
+        >
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitleId">
+                        Confirm Payment
+                    </h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    ></button>
+                </div>
+                <div class="modal-body">Youa're about to pay {{ request.driver.user.first_name }} {{ request.driver.user.last_name }} {{request.cost}}!</div>
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Close
+                    </button>
+                    <form method="POST">
+                {% csrf_token %}
+                    <button class="btn btn-primary" type="submit"  onclick="pay()">Pay From Balance</button>
+                </form> 
+                </div>
+            </div>
+        </div>
+       </div>
+       
+       <!-- Optional: Place to the bottom of scripts -->
+       <script>
+        const myModal = new bootstrap.Modal(
+            document.getElementById("modalId"),
+            options,
+        );
+       </script>
+       
+
+    {% comment %} <script>
+    function pay(){
+        alert("After successful payment and confirmation, kindly inform the mechanic to mark the request as Released.");
+        setTimeout(function() {
+            window.location.href="{% url 'driver-dashboard' %}"; // Reloads the page
+        }, 10000);
+
+    }
+    </script> {% endcomment %}
+<!-- Step 3: JavaScript to Initialize Payment -->
+<script>
+    function payMechanic() {
+        window.Korapay.initialize({
+            //pk_live_hhE5aFcwbFivmzBFAEHPktwYZahUQCx6z7CFVijJ
+            key: "pk_test_XSNM2tCEi2MShm3gRcVFDNiJUJHtbXCuNdiVL2n6", 
+            reference: "{{ref}}",
+            amount: {{ total }},
+            currency: "NGN",
+            customer: {
+                name: "{{ request.driver.user.first_name }} {{ request.driver.user.last_name }}", 
+                email: "{{ request.driver.user.email }}",
+            },
+            narration:  "Payment for {{request.problem_description}}", 
+            notification_url: "https://autoaid.com.ng/korapay-webhook/", 
+            metadata: {
+                transaction_type: "request_payment",
+                reference_id: {{request.id}},
+            },
+            onClose: function () {
+                alert("Payment process was closed.");
+            },
+            onSuccess: function (data) {
+                alert("Payment successful! \nThe page will reload in 10 seconds...");
+                console.log("Success data:", data);
+                setTimeout(function() {
+                    window.location.reload(); 
+                }, 10000);
+            },
+            onFailed: function (data) {
+                alert("Payment Failed");
+                console.log("Failed data:", data);
+            },
+            onPending: function () {
+                alert("Payment pending, please wait while it is being processed.");
+            }
+        });
+    }
+</script>
+
+    <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const link = document.querySelector(".in");
+
+    function updateLinkStyle() {
+      const size = window.innerWidth;
+      if (size <= 768) {
+        link.style.color = "rgba(10, 116, 218, 0.9)";
+        link.style.backgroundColor =  ""
+      } else {
+        link.style.backgroundColor = "rgba(10, 116, 218, 0.1)";
+        link.style.color = "rgba(10, 116, 218, 0.9)"; // Reset color if previously set
+      }
+    }
+
+    updateLinkStyle();
+
+  window.addEventListener("resize", updateLinkStyle);
+  });
+</script>
+{% endblock content %}

@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LogIn || Auto Aid - Fast & Reliable Vehicle Breakdown Assistance | Available 24/7</title>
+    <link rel="shortcut icon" href="{% static 'image/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" type="image/x-icon" href="{% static 'image/favicon.ico' %}">
+    <meta name="keywords" content="vehicle breakdown assistance, roadside assistance, emergency car repair, car breakdown service, certified mechanics, mobile car repair, 24/7 roadside help, tire change service, jump-start service, emergency towing, car repair near me, roadside mechanic, vehicle repair assistance, driver support, affordable car repair, quick car assistance">
+    <meta name="description" content="Find reliable, real-time roadside assistance anytime, anywhere with our vehicle breakdown support service. Connect instantly with skilled mechanics, ensuring fast and effective help when you need it the most.">
+    <!-- fontawesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+      <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+    <link rel="stylesheet" href="{% static 'css/UserLogIn.css' %}" />
+  </head>
+  <body>
+    <form method="POST">
+      <header style="margin-top:200px;">
+        <h1>Log In</h1>
+      </header>
+      <main>
+      {% csrf_token %}
+        {% comment %} <section class="nav-container">
+          <nav>
+            <div class="social">
+              <a href="#" class="social-media-link" id="googleLogin">
+                <img src="{% static 'image/google-logo.svg' %}" />
+                Continue with Google
+              </a>
+            </div>
+            <div class="social">
+              <a href="#" class="social-media-link" id="facebookLogin">
+                <img src="{% static 'image/facebook-logo.svg' %}" alt="Facebook's logo" />
+                Continue with Facebook
+              </a>
+            </div>
+            <div class="social">
+              <a href="#" class="social-media-link" id="appleLogin">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
+                  alt="Apple's logo" />
+                Continue with Apple
+              </a>
+            </div>
+          </nav>
+        </section>
+        <div class="divider-container">
+          <hr class="divider-line" />
+          <span class="divider-text">OR</span>
+          <hr class="divider-line" />
+        </div> {% endcomment %}
+        {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="input-control">
+          <label for="email">Username</label>
+          <input type="text" name="username" id="email" placeholder="" />
+        </div>
+        <div class="input-control">
+          <div class="password-container">
+            <label for="password">Password</label>
+            <button type="button" id="togglePassword" class="toggle-password">
+              <i class="fa fa-eye"></i> Show
+            </button>
+          </div>
+          <div>
+            <input
+              type="password"
+              id="Input_Password"
+              name="password"
+              placeholder="" />
+          </div>
+
+          <div class="checkbox">
+            <input
+              type="checkbox"
+              data-val="true"
+              data-val-required="The Remember me field is required."
+              id="Input_RememberMe"
+              name="Input.RememberMe"
+              value="true" />
+            <label for="Input_RememberMe">Remember me</label>
+          </div>
+        </div>
+        <div class="button">
+          <button type="submit">Log in</button>
+        </div>
+        <a href="{% url 'forgot-password' %}" style="font-weight: bold;" class="form-text text-primary">Forgot Password?</a>
+        <hr />
+        <div class="button">
+          <p>Don't have an account?</p>
+          <a href="register">Sign up</a>
+        </div>
+      </main>
+    </form>
+
+    <script>
+      document
+        .getElementById("togglePassword")
+        .addEventListener("click", function () {
+          const passwordInput = document.getElementById("Input_Password");
+          const toggleButton = this;
+
+          if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleButton.innerHTML = '<i class="fa fa-eye-slash"></i> Hide';
+          } else {
+            passwordInput.type = "password";
+            toggleButton.innerHTML = '<i class="fa fa-eye"></i> Show';
+          }
+        });
+    </script>
+    <script
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
+        ></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous"
+        ></script>
+  </body>
+</html>

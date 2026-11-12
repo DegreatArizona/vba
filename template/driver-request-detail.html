@@ -1,0 +1,98 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+<style>
+.request-container {
+    width: 70%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+p {
+    line-height: 1.5;
+    margin: 5px 0;
+}
+
+.request-info, .request-details {
+    margin-bottom: 20px;
+}
+
+.actions .btn {
+    padding: 10px 20px;
+    margin: 10px 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.alert {
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+</style>
+<div class="request-container">
+        <h2>Request Details</h2>
+        <div class="request-info">
+            <h3>Vehicle Information</h3>
+            <p><strong>Vehicle Model:</strong> {{ request.vehicle_name }}</p>
+            <p><strong>License Number:</strong> {{ request.vehicle_no }}</p>
+        </div>
+
+        <div class="request-details">
+            <h3>Request Details</h3>
+            <p><strong>Problem Description:</strong> {{ request.problem_description }}</p>
+            <p><strong>Service Type:</strong> {{ request.category }}</p>
+            <p><strong>Location:</strong> {{ request.location }}</p>
+            <p><strong>Status:</strong> {{ request.status }}</p>
+        </div>
+
+        <div class="actions">
+            {% if request.status == 'Pending' %}
+                <button class="btn btn-primary" onclick="location.href='{% url 'request-edit' request.id %}'">Edit Request <i class="fa fa-edit" aria-hidden="true"></i></button>
+                <button class="btn btn-danger" onclick="location.href='{% url 'request-delete' request.id %}'">Delete Request <i class="fa fa-trash" aria-hidden="true"></i></button>
+                <button class="btn btn-secondary" onclick="location.href='{% url 'request-cancel' request.id %}'">Cancel Request <i class="fa fa-times-circle-o" aria-hidden="true"></i></button>
+            {% elif request.status == 'Approved' %}
+                <p class="alert alert-info">This request has been approved and is being processed.</p>
+            {% elif request.status == 'Repairing' %}
+                <p class="alert alert-warning">The vehicle is currently being repaired.</p>
+            {% elif request.status == 'Repairing Done' %}
+                <p class="alert alert-success">Repair is complete. You will be notified for pickup.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock content %}

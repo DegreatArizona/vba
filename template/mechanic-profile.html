@@ -1,0 +1,306 @@
+{% extends "mechanicbase.html" %}
+{% load static %}
+{% block content %}
+<main class="main-content offset-md-3 col-md-9 offset-lg-2 col-lg-10">
+          <!-- head -->
+          <section class="mechProfile container">
+    <div id="head" class="mb-4">
+        <h1>Profile</h1>  
+        <p>Manage your personal information, preferences, and availability.</p>  
+        <h2>Personal Information</h2>
+    </div> 
+    {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+    <!-- Profile Information Section -->
+    <form method="post">
+    {%csrf_token%}
+    <div class="profile-infor row mb-4">
+        <div class="col-md-6">
+            <label for="firstName">First Name</label>
+            <input type="text" class="form-control" placeholder="First Name" name="first_name" value="{{ mechanic.user.first_name }}" required>
+        </div>
+        <div class="col-md-6">
+            <label for="lastName">Last Name</label>
+            <input type="text" class="form-control" placeholder="Last Name" name="last_name" value="{{ mechanic.user.last_name }}" required>
+        </div>
+        <div class="col-md-6">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" placeholder="mechanic@user.com" name="email" value="{{ mechanic.user.email }}" required>
+        </div>
+        <div class="col-md-6">
+            <label for="password">Confirm Password</label>
+            <input type="password" class="form-control" placeholder="Confirm Password" name="password" required>
+        </div>
+    </div>
+
+    <!-- Profile Picture Upload Section -->
+    <div class="profile-picture row mb-4">
+    <div class="col-md-6">
+            <label for="email">Username</label>
+            <input type="text" class="form-control" placeholder="Username" name="username" value="{{ mechanic.user.username }}" required>
+        </div>
+    </div>
+
+    <!-- Save and Cancel Buttons -->
+    <div class="profile-button mb-4 d-flex justify-content-start">
+        <button type="submit" name="mechanic_update_profile" class="btn save-btn me-2">Save Changes</button>
+        <button type="reset" class="btn cancel-btn">Cancel</button>
+    </div>
+    </form>
+
+    
+            <section class="change-password" style="margin-botton: 50px;">
+            <h2>Basic Information</h2>
+    <div class="row box mb-4">
+        <div class="col-md-4 mb-4">
+        <form method="post" enctype="multipart/form-data">
+        {%csrf_token%}
+        <div>
+        <section class="input-field-container">
+        <div class="input-profile-pic d-flex">
+        <div class="profile-pic-con" style="border-radius: 50%; height: 150px;">
+        {% if mechanic.profile_pic.url %}
+            <img src="{{ mechanic.profile_pic.url }}" style="border-radius: 50%; width:150px; height: 150px;" alt="Profile Picture">
+        {% else %}
+            <img src="{% static 'image/mechanic.png' %}" style="border-radius: 50%; width:150px; height: 150px;" alt="Default Profile Picture">
+        {% endif %}
+        </div>
+        <label for="upload" style="margin-top: 110px; margin-left: -40px;">
+            <img
+            src="{% static '/image/camera.svg' %}"
+            class=""
+            alt="camera"
+        />
+        </div>
+        </label>
+        </section>
+        <section class="input-field-container">
+        <div class="input-profile-pic d-flex">
+        <div class="profile-pic-con" style="border-radius: 50%; height: 150px;">
+        {% if mechanic.business_license.url %}
+            <img src="{{ mechanic.business_license.url }}" style="border-radius: 5%; width:150px; height: 150px;" alt="business license">
+        {% else %}
+            <img src="{% static 'image/business_license.png' %}" style="border-radius: 5%; width:150px; width: 150px;" alt="Default business  license">
+        {% endif %}
+        </div>
+        <label for="bupload" style="margin-top: 110px; margin-left: -40px;">
+            <img
+            src="{% static '/image/camera.svg' %}"
+            class=""
+            alt="camera"
+        />
+        </div>
+        </label>
+        </section>
+                </div>
+        </div>
+        <div class="col-md-8 mb-4">
+                <label for="mobile">Phone Number</label>
+                <input type="tel" name="mobile" id="mobile" class="form-control" value="{{mechanic.mobile}}" placeholder="Phone Number" required>
+                <label for="address">Office Address</label>
+                <textarea class="form-control" id="address" name="address">{{mechanic.address}}</textarea>
+                <label for="state">State</label>                                
+                <select name="state" class="form-control" onchange="selectLGA(this)" id="state">
+                {% if mechanic.state %}
+                <option value="" selected="selected">{{mechanic.state}}</option>
+                {% else %}
+                <option value="" selected="selected">- Select State -</option>
+                {% endif %}
+                </select>
+                <label for="lga">Local Government</label>
+                <select name="local_government" class="form-control" id="lga">
+                {% if mechanic.local_government %}
+                <option>{{mechanic.local_government}}</option>
+                {% else %}
+                <option>Select LGA</option>
+                {% endif %}
+                </select>
+                <div>
+                <label for="upload" class="upload-label">
+                Profile Picture
+                <div class="d-block">
+                <img src="{% static 'image/file-add.svg' %}" alt="file upload" />
+                <input 
+                    type="file" 
+                    name="profile_pic" 
+                    id="upload" 
+                    accept=".png,.jpg,.jpeg" 
+                    style="display: none;" 
+                />
+                Click to upload
+                </div>
+                </label>
+            </div>
+                <div>
+                <label for="bupload" class="upload-label">
+                Business License
+                <div class="d-block">
+                <img src="{% static 'image/file-add.svg' %}" alt="file upload" />
+                <input 
+                    type="file" 
+                    name="business_license" 
+                    id="bupload" 
+                    accept=".pdf,.txt,.docx,.png,.jpg,.jpeg" 
+                    style="display: none;" 
+                />
+                Click to upload
+                </div>
+                </label>
+            </div>
+        </div>
+    </div>
+    <button type="submit" name="mechanic_update" class="btn save-btn mt-2">Save Changes</button>
+    
+        </form>
+        </section>
+
+    <!-- Service Specializations and Availability Section -->
+    <div class="row box mb-4" style="margin-top: 50px;">
+        <div class="col-md-6 mb-4">
+        <form method="post">
+        {%csrf_token%}
+        <section class="service-specializations">
+                <h2>Service Specializations</h2>
+                <div>
+                    {{serviceForm.as_p}}
+                </div>
+                <button type="submit" name="service_form" class="btn save-btn mt-2">Save Changes</button>
+        </section>
+        </form>
+        </div>
+
+<div class="col-md-6 mb-4">
+    <form method="post">
+        {% csrf_token %}
+        <section class="service-specializations">
+            <h2>Account Details</h2>
+            <div>
+                <div class="mb-3">
+                    <label for="bank_code" class="form-label">Bank Name</label>
+                    <select
+                        class="form-select form-select-lg"
+                        name="bank_code"
+                        id="bank_code"
+                        required
+                    >
+                        <option selected disabled>{{mechanic.bank_name}}</option>
+                        {% for bank in banks %}
+                        <option value="{{ bank.code }}">{{ bank.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <label for="account_number">Account Number</label>
+                <input
+                    type="number"
+                    value="{{mechanic.account_number}}"
+                    name="account_number"
+                    id="account_number"
+                    class="form-control"
+                    placeholder="Account number"
+                    required
+                >
+
+                <label for="account_name">Account Name</label>
+                <input
+                    type="text"
+                    value="{{mechanic.account_name}}"
+                    name="account_name"
+                    id="account_name"
+                    class="form-control"
+                    placeholder="Account name"
+                    readonly
+                >
+            </div>
+            <button type="submit" name="account_detail" class="btn save-btn mt-2">Save Changes</button>
+        </section>
+    </form>
+</div>
+<script>
+    //Fetch all States
+    fetch('https://nga-states-lga.onrender.com/fetch')
+            .then((res) => res.json())
+            .then((data) => {
+            var x = document.getElementById("state");
+                for (let index = 0; index < Object.keys(data).length; index++) {
+                    var option = document.createElement("option");
+                    option.text = data[index];
+                    option.value = data[index];
+                    x.add(option);
+                } 
+                });
+    //Fetch Local Goverments based on selected state
+    function selectLGA(target) {
+        var state = target.value;
+            fetch('https://nga-states-lga.onrender.com/?state='+state)
+            .then((res) => res.json())
+            .then((data) => {
+                var x = document.getElementById("lga");
+                    
+                var select = document.getElementById("lga");
+                var length = select.options.length;
+                for (i = length-1; i >= 0; i--) {
+                    select.options[i] = null;
+                }
+                for (let index = 0; index < Object.keys(data).length; index++) {
+                        var option = document.createElement("option");
+                        option.text = data[index];
+                        option.value = data[index];
+                        x.add(option);
+                    } 
+                });
+        }
+        
+</script>
+<script>
+    $(document).ready(function () {
+        $("#account_number, #bank_code").on("input", function () {
+            const accountNumber = $("#account_number").val();
+            const bankCode = $("#bank_code").val();
+
+            // Ensure account number is 10 digits
+            if (bankCode && accountNumber.length === 10) {
+                $.ajax({
+                    url: "{% url 'account_verification' %}",
+                    type: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    data: JSON.stringify({
+                        account_number: accountNumber,
+                        bank_code: bankCode
+                    }),
+                    contentType: "application/json",
+                    success: function (response) {
+                        if (response.status) {
+                            $("#account_name").val(response.data.account_name);
+                        } else {
+                            $("#account_name").val("");
+                            alert(response.message || "Could not verify account.");
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred while verifying the account.");
+                    }
+                });
+            } else if (accountNumber.length > 10) {
+                $("#account_name").val("");
+                alert("Account number must be exactly 10 digits.");
+            }
+        });
+    });
+</script>
+
+
+
+    </div>
+</section>
+ 
+        </main>
+{% endblock content %}

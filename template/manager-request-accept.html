@@ -1,0 +1,77 @@
+{% extends "managerbase.html" %} {% load static %} {% block content %}
+<style>
+  .request-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .request-container input,
+  .request-container textarea,
+  .request-container select {
+    width: 100%;
+    outline: none;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(10, 116, 218, 0.9);
+  }
+  .request-container label {
+    display: block;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .request-container button,
+  .request-container a {
+    width: 100%;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(10, 116, 218, 0.9);
+    margin-top: 20px;
+  }
+</style>
+<div class="request-container">
+{% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+  <h2>Accept Request</h2>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="input-field">
+      <label for="mechanic_mobile" class="input-label">Mechanic Mobile</label>
+      <input type="text" id="mechanic_mobile" name="mechanic_mobile" placeholder="Enter mechanic's phone number" required />
+    </div>
+
+    <div class="input-field">
+      <label for="mechanic_location" class="input-label">Mechanic Location</label>
+      <input type="text" id="mechanic_location" name="mechanic_location" placeholder="Enter mechanic's location" required />
+    </div>
+
+    <div class="input-field">
+      <label for="mechanic" class="input-label">Select Mechanic</label>
+      <select name="mechanic" id="mechanic" required>
+        <option value="" disabled selected>Select Mechanic</option>
+        {% for mechanic in mechanics %}
+        <option value="{{ mechanic.id }}">
+          {{ mechanic.user.first_name }} {{ mechanic.user.last_name }} - 
+          {{ mechanic.address }}, {{ mechanic.local_government }}, {{ mechanic.state }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Accept Request</button>
+  </form>
+  <a class="btn btn-outline-primary" href="{% url 'manager-dashboard' %}">Go Back</a>
+</div>
+
+
+{% endblock content %}

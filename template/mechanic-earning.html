@@ -1,0 +1,166 @@
+{% extends "mechanicbase.html" %}
+{% load static %}
+{% block content %}
+
+<main class="main-content offset-md-3 col-md-9 offset-lg-2 col-lg-10">
+          {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+          <!-- head -->
+          <section class="head">
+            <!-- first row -->
+            <article class="head-title container">
+              <div class="head-title1">
+                <h2 class="page-title">Earnings</h2>
+              </div>
+              <div class="head-title2">
+                <div class="row">
+                  <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="stat-card p-3">
+                      <div class="flex-between">
+                        <h6>Total Earnings</h6>
+                        <span>
+                          <img src="{% static 'image/ArrowRise.svg' %}" alt="ArrowRise" />
+                        </span>
+                      </div>
+                      <div>
+                        <h3>&#x20A6;{{bill}}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="stat-card p-3">
+                      <div class="flex-between">
+                        <h6>This Month</h6>
+                        <span>
+                          <img src="{% static 'image/ArrowRise.svg' %}" alt="ArrowRise" />
+                        </span>
+                      </div>
+                      <div>
+                        <h3>&#x20A6;{{month_bill}}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="stat-card p-3">
+                      <div class="flex-between">
+                        <h6>Pending Payments</h6>
+                        <span>
+                          <img src="{% static 'image/ArrowRise.svg' %}" alt="ArrowRise" />
+                        </span>
+                      </div>
+                      <div>
+                        <h3>&#x20A6;{{pending_bill}}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="stat-card p-3">
+                      <div class="flex-between">
+                        <h6>Balance</h6>
+                        <span>
+                          <img src="{% static 'image/ArrowRise.svg' %}" alt="ArrowRise" />
+                        </span>
+                      </div>
+                      <div class="flex-between">
+                        <h3>&#x20A6;{{salary}}</h3>
+                        {% if salary %}
+                        <a id="" class="btn btn-primary" href="{% url 'mechanic-withdraw' %}" role="button">Withdraw</a>
+                        {% else %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <!-- second row -->
+            <article class="container">
+              <div class="chart-container">
+                <canvas id="earning-chart"></canvas>
+              </div>
+            </article>
+            <!-- third row -->
+            <article class="container">
+              <div class="section-title-container">
+                <h2 class="section-title">Withdrawal Hostory</h2>
+              </div>
+              <div class="table-responsive">
+              {% if withdrawal_history %}
+                <table id="earningTable" class="table border">
+                  <thead class="light-thead">
+                    <tr>
+                      <th class="text-body-tertiary">ID</th>
+                      <th class="text-body-tertiary">Transaction Ref</th>
+                      <th class="text-body-tertiary">Account Name</th>
+                      <th class="text-body-tertiary">Account Number</th>
+                      <th class="text-body-tertiary">Bank Name</th>
+                      <th class="text-body-tertiary">Narration</th>
+                      <th class="text-body-tertiary">Amount Withdraw</th>
+                      <th class="text-body-tertiary">Amount Recieved</th>
+                      <th class="text-body-tertiary">Date</th>
+                      <th class="text-body-tertiary">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBody">
+                    {% for history in withdrawal_history %}
+                          <tr>
+                            <td>{{history.id}}</td>
+                            <td>{{history.transaction_reference}}</td>
+                            <td>{{history.account_name}}</td>
+                            <td>{{history.account_number}}</td>
+                            <td>{{history.bank_name}}</td>
+                            <td>{{history.narration}}</td>
+                            <td>&#x20A6; {{history.amount_withdraw}}</td>
+                            <td>&#x20A6; {{history.amount_recieved}}</td>
+                            <td>{{history.date}}</td>
+                            <td>
+                              {% if history.status == 'Success' %}
+                                  <span class="status table-success-status">{{ history.status }}</span>
+                              {% elif history.status == 'Pending' %}
+                                  <span class="status table-danger-status">{{ history.status }}</span>
+                              {% elif history.status == 'Failed' %}
+                                  <span class="status table-danger-status">{{ history.status }}</span>
+                              {% else %}
+                                  <span class="status table-pending-status">{{ history.status }}</span>
+                              {% endif %}
+                            </td>
+                          </tr>
+                          {% endfor %}
+                          <!-- Add more rows as needed -->
+                  </tbody>
+                  <tfoot class="light-tfoot">
+                    <tr>
+                      <th class="text-body-tertiary">ID</th>
+                      <th class="text-body-tertiary">Transaction Ref</th>
+                      <th class="text-body-tertiary">Account Name</th>
+                      <th class="text-body-tertiary">Account Number</th>
+                      <th class="text-body-tertiary">Bank Name</th>
+                      <th class="text-body-tertiary">Narration</th>
+                      <th class="text-body-tertiary">Amount Withdraw</th>
+                      <th class="text-body-tertiary">Amount Recieved</th>
+                      <th class="text-body-tertiary">Date</th>
+                      <th class="text-body-tertiary">Status</th>
+                    </tr>
+                  </tfoot>
+                </table>
+                {% else %}
+                      <section class="no-request mt-4">
+                      <h2>Your withdrawal history is empty!</h2>
+                      <img
+                        src="{% static '/image/no-info.svg' %}"
+                        class="img-fluid"
+                        alt=""
+                      />
+                    </section>
+                      {% endif %}
+              </div>
+            </article>
+          </section>
+        </main>
+{% endblock content %}

@@ -1,0 +1,145 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+
+<main class="history container">
+      <h2 class="my-4">Request a Service</h2>
+      {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+      <form id="requestServiceForm" action="" method="POST">
+      {% csrf_token %}
+        <h5 class="text-black-50">Vehicle Information</h5>
+        <section class="input-field-container">
+          <div class="input-field">
+            <label for="vehicle_model" class="input-label">Vehicle Model</label>
+            <input
+              name="vehicle_name"
+              type="text"
+              id="vehicle_model"
+              placeholder="e.g. Toyota Camry 2019"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="vehicle_number" class="input-label"
+              >Vehicle Number</label
+            >
+            <input
+              name="vehicle_no"
+              type="text"
+              id="vehicle_number"
+              placeholder="e.g. ABC-123XY"
+              required />
+          </div>
+        </section>
+        <section class="input-field-container">
+          <div class="input-field">
+          <label for="state">State</label>                                
+          <select name="state" class="form-control" id="state" required>
+            <option value="" selected="selected">- Select State -</option>
+          </select>
+        </div>
+          <div class="input-field">
+            <label for="service_type" class="input-label">Service Type</label>
+            <select id="service_type"  name="category" class="input-field" required>
+              <option value="" disabled selected>
+                -- Choose Service Type --
+              </option>
+              <option value="Tire Repair">Tire Repair</option>
+              <option value="Towing Service">Towing Service</option>
+              <option value="Battery Jumpstart">Battery Jumpstart</option>
+              <option value="Electrical Issues">Electrical Issues</option>
+              <option value="Engine Repair">Engine Repair</option>
+              <option value="Bodywork/Collision Repair">Bodywork/Collision Repair</option>
+              <option value="Other Service">Other Service</option>
+            </select>
+          </div>
+        </section>
+        <section class='input-field-container'>
+        <div class="input-field">
+            <label for="vehicle_problem" class="input-label"
+              >Describe the Problem</label
+            >
+            <textarea
+              cols="30"
+              rows="4"
+              name="problem_description"
+              id="vehicle_problem"
+              placeholder="e.g. Flat tire on rear left side..."
+              required></textarea>
+          </div>
+        <div class="input-field">
+            <label for="phone_number" class="input-label"
+              >Phone Number</label
+            >
+            <input
+              name="mobile"
+              type="text"
+              id="phone_number"
+              placeholder="e.g. +23471804389012"
+              required />
+          </div>
+        </section>
+        <section class="location-container">
+          <label class="input-label">Location</label>
+          <button type="button" class="location-btn" id="automatic-address">
+            Use Current Location <i class="fa fa-location-dot"></i>
+          </button>
+          <button type="button" class="outline-btn" id="manual-address">
+            Enter Address Manually <i class="fa fa-pen"></i>
+          </button>
+          <div class="input-field input-field-container">
+            <input
+              id="location"
+              name="location"
+              type="text"
+              placeholder="Enter your address here" 
+              required/>
+          </div>
+        </section>
+        <section class="submit-container">
+          <button type="submit" class="submit-btn">Submit</button>
+        </section>
+      </form>
+    </main>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const link = document.querySelector(".req");
+
+    function updateLinkStyle() {
+      const size = window.innerWidth;
+      if (size <= 768) {
+        link.style.color = "rgba(10, 116, 218, 0.9)";
+        link.style.backgroundColor =  ""
+      } else {
+        link.style.backgroundColor = "rgba(10, 116, 218, 0.1)";
+        link.style.color = "rgba(10, 116, 218, 0.9)"; // Reset color if previously set
+      }
+    }
+
+    updateLinkStyle();
+
+  window.addEventListener("resize", updateLinkStyle);
+  });
+</script>
+
+<script>
+    //Fetch all States
+    fetch('/state.json')
+            .then((res) => res.json())
+            .then((data) => {
+            var x = document.getElementById("state");
+                for (let index = 0; index < Object.keys(data).length; index++) {
+                    var option = document.createElement("option");
+                    option.text = data[index];
+                    option.value = data[index];
+                    x.add(option);
+                } 
+                });
+</script>
+{% endblock content %}

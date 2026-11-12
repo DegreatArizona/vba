@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #e0e4e8;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: rgba(10, 116, 218, 0.9);
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .header img {
+            max-height: 50px;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .body {
+            padding: 20px;
+        }
+        .body h2 {
+            color: rgba(10, 116, 218, 0.9);
+            margin-bottom: 10px;
+        }
+        .body p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: rgba(10, 116, 218, 0.9);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .cta-button:hover {
+            background-color: rgba(10, 116, 218, 1);
+        }
+        .footer {
+            background-color: #f1f5f9;
+            color: #7d8aa0;
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+        }
+        .footer a {
+            color: rgba(10, 116, 218, 0.9);
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header Section -->
+        <div class="header">
+            <img src="https://www.autoaid.com.ng/static/image/mail-logo.svg" alt="Auto Aid Logo" />
+            <h1>Auto Aid - Fast & Reliable Vehicle Breakdown Assistance | Available 24/7</h1>
+        </div>
+
+        <!-- Body Section -->
+        <div class="body">
+            <h2>Hello Admin!</h2>
+            <p>
+                Congratulations, a new user registered on your website
+            </p>
+            <ul>
+            <li>Name: {{user.first_name}} {{user.last_name}}</li>
+            <li>Email: {{user.email}}</li>
+            </ul>
+            <p>
+                To view your new user full details, click the button below:
+            </p>
+            <a href="https://autoaid.com.ng/admin" class="cta-button">View New User</a>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer">
+            <p>
+                Keep it up with the marketing work!
+            </p>
+            <p>
+                <a href="https://autoaid.com.ng">Visit our website</a> | 
+                <a href="#">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

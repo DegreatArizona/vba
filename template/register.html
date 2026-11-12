@@ -1,0 +1,409 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SignUp || Auto Aid - Fast & Reliable Vehicle Breakdown Assistance | Available 24/7</title>
+    <link rel="shortcut icon" href="{% static 'image/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" type="image/x-icon" href="{% static 'image/favicon.ico' %}">
+    <meta name="keywords" content="vehicle breakdown assistance, roadside assistance, emergency car repair, car breakdown service, certified mechanics, mobile car repair, 24/7 roadside help, tire change service, jump-start service, emergency towing, car repair near me, roadside mechanic, vehicle repair assistance, driver support, affordable car repair, quick car assistance">
+    <meta name="description" content="Find reliable, real-time roadside assistance anytime, anywhere with our vehicle breakdown support service. Connect instantly with skilled mechanics, ensuring fast and effective help when you need it the most.">
+    <!-- fontawesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+      <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+    <link rel="stylesheet" href="{% static 'css/signup.css' %}" />
+    <!-- script for the sign up page -->
+    <script defer src="{% static 'js/signup.js' %}"></script>
+  </head>
+  <body>
+    <main id="user-form-container">
+      <header>
+        <h2>Create an account</h2>
+        <p>Already have an account? <a href="login" style="text-decoration:none;">Log in</a></p>
+        {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <!-- Enter the url for the login page -->
+        <section class="account-type-container">
+          <label class="account-type-label">Account Type:</label>
+          <div class="radio-control">
+            <label for="driver" class="input-label">Driver</label>
+            <input type="radio" id="driver" name="account_type" checked />
+          </div>
+          <div class="radio-control">
+            <label for="mechanic" class="input-label">Mechanic</label>
+            <input type="radio" id="mechanic" name="account_type" />
+          </div>
+        </section>
+      </header>
+
+      <!-- Driver's Form -->
+      <section class="form-group">
+        <form action="" id="DriverForm" method="POST" class="active">
+        {% csrf_token %}
+          <div class="input-field">
+            <label for="name" class="input-label">First Name</label>
+            <input
+              type="text"
+              id="name"
+              name="first_name"
+              placeholder="Enter your first name"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="name" class="input-label">Last Name</label>
+            <input
+              type="text"
+              id="name"
+              name="last_name"
+              placeholder="Enter your last name"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="username" class="input-label">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Enter your username"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="email" class="input-label">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email address"
+              required />
+          </div>
+          <div class="input-field">
+          <label for="mobile">Phone Number</label>
+          <input type="tel" name="mobile" id="mobile" class="form-control" value="+234" placeholder="Phone Number" required>
+          </div>
+          <div class="input-field">
+            <div class="password-container">
+              <label for="password1" class="input-label"
+                >Create a password</label
+              >
+              <span class="show-password"><i class="fa fa-eye"></i> Show </span>
+            </div>
+            <input
+              type="password"
+              id="password1"
+              name="password"
+              placeholder="Enter your password"
+              minlength="8"
+              required />
+            <small
+              >Use 8 or more characters with a mix of letters, numbers &
+              symbols</small
+            >
+          </div>
+          <div class="input-field">
+            <div class="password-container">
+              <label for="password1" class="input-label"
+                >Confirm password</label
+              >
+            </div>
+            <input
+              type="password"
+              id="password1"
+              name="rPassword"
+              placeholder="Enter your password"
+              minlength="8"
+              required />
+            <small
+              >Use 8 or more characters with a mix of letters, numbers &
+              symbols</small
+            >
+          </div>
+          <section class="submit-container">
+            <p>
+              By creating an account you agree to the Terms of use and Privacy
+              Policy.
+            </p>
+            <button type="submit" name="driver_submit">Create an account</button>
+          </section>
+        </form>
+
+        <!-- Mechanic's Form -->
+        <form action="" method="POST" id="MechanicForm" enctype="multipart/form-data">
+        {% csrf_token %}
+          <div class="input-field">
+            <label for="first_name" class="input-label">First Name</label>
+            <input
+              type="text"
+              name="first_name"
+              id="first_name"
+              placeholder="Enter your first name"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="last_name" class="input-label">Last Name</label>
+            <input
+              type="text"
+              name="last_name"
+              id="last_name"
+              placeholder="Enter your last name"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="username" class="input-label">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Enter your username"
+              required />
+          </div>
+          <div class="input-field">
+          <label for="mobile">Phone Number</label>
+          <input type="tel" name="mobile" id="mobile" class="form-control" value="+234" placeholder="Phone Number" required>
+          </div>
+          <div class="input-field">
+            <label for="email" class="input-label">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email address"
+              required />
+          </div>
+          <div class="input-field">
+            <div class="password-container">
+              <label for="password2" class="input-label"
+                >Create a password</label
+              >
+              <span class="show-password"><i class="fa fa-eye"></i> Show</span>
+            </div>
+            <input
+              type="password"
+              id="password2"
+              name="password"
+              placeholder="Enter your password"
+              minlength="8"
+              required />
+            <small
+              >Use 8 or more characters with a mix of letters, numbers &
+              symbols</small
+            >
+          </div>
+          <div class="input-field">
+            <div class="password-container">
+              <label for="password2" class="input-label"
+                >Confirm password</label
+              >
+            </div>
+            <input
+              type="password"
+              id="password2"
+              name="rPassword"
+              placeholder="Enter your password"
+              minlength="8"
+              required />
+            <small
+              >Use 8 or more characters with a mix of letters, numbers &
+              symbols</small
+            >
+          </div>
+          
+          <!-- Service Specializations -->
+          <section class="specialty-container">
+            <h3>Service Specializations</h3>
+            <div class="specialties">
+              {{ serviceForm.as_p }}
+            </div>
+            <div class="input-field">
+            <label for="union_name" class="input-label">Mechanic Union Name</label>
+            <input
+              type="text"
+              id="union_name"
+              name="union_name"
+              placeholder="Enter your union name"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="union_location" class="input-label">Mechanic Union Location</label>
+            <input
+              type="text"
+              id="union_location"
+              name="union_location"
+              placeholder="Enter your union location"
+              required />
+          </div>
+          <div class="input-field">
+            <label for="address" class="input-label">Address</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              placeholder="Enter your address"
+              required />
+          </div>
+                <label for="state">State</label>                                
+                <select name="state" class="form-control" onchange="selectLGA(this)" id="state">
+                <option value="" selected="selected">- Select State -</option>
+                </select>
+                <label for="lga">Local Government</label>
+                <select name="local_government" class="form-control" id="lga">
+                <option>Select LGA</option>
+                </select>
+          </section>
+    <div id="error-message" style="color: red; display: none;">Business license and profile pic are required!!</div>
+          <section class="license">
+                <h3>Profile Picture</h3><br>
+                <div class="upload-container">
+                <label for="pic" class="upload-label">
+                <img src="{% static 'image/file-add.svg' %}" alt="file upload" />
+                <input 
+                    type="file" 
+                    name="profile_pic" 
+                    id="pic" 
+                    accept=".png,.jpg,.jpeg" 
+                    style="display: none;" 
+                    required
+                />
+                Click to upload
+                </label>
+                <div class="tips-group">
+      <span class="tips" title="YOU CAN UPLOAD A PNG FILE">PNG</span>
+      <span class="tips" title="YOU CAN UPLOAD A JPG FILE">JPG</span>
+      <span class="tips" title="YOU CAN UPLOAD A JPEG FILE">JPEG</span>
+    </div>
+            </div>
+            </section>
+          <!-- Business License -->
+          <section class="license">
+  <h3>Business License</h3>
+  
+  <div class="upload-container">
+    <label for="upload" class="upload-label">
+      <img src="{% static 'image/file-add.svg' %}" alt="file upload" />
+      <input 
+        type="file" 
+        name="business_license" 
+        id="upload" 
+        accept=".pdf,.txt,.docx,.png,.jpg,.jpeg" 
+        style="display: none;" 
+        required
+      />
+      Click to upload
+    </label>
+    <div class="tips-group">
+      <span class="tips" title="YOU CAN UPLOAD A PDF FILE">PDF</span>
+      <span class="tips" title="YOU CAN UPLOAD A MICROSOFT DOCUMENT">DOCX</span>
+      <span class="tips" title="YOU CAN UPLOAD A TEXT FILE">TXT</span>
+      <span class="tips" title="NOT MORE THAN 10 MEGABYTES">&lt; 10MB</span>
+    </div>
+  </div>
+</section>
+
+<script>
+    //Fetch all States
+    fetch('https://nga-states-lga.onrender.com/fetch')
+            .then((res) => res.json())
+            .then((data) => {
+            var x = document.getElementById("state");
+                for (let index = 0; index < Object.keys(data).length; index++) {
+                    var option = document.createElement("option");
+                    option.text = data[index];
+                    option.value = data[index];
+                    x.add(option);
+                } 
+                });
+    //Fetch Local Goverments based on selected state
+    function selectLGA(target) {
+        var state = target.value;
+            fetch('https://nga-states-lga.onrender.com/?state='+state)
+            .then((res) => res.json())
+            .then((data) => {
+                var x = document.getElementById("lga");
+                    
+                var select = document.getElementById("lga");
+                var length = select.options.length;
+                for (i = length-1; i >= 0; i--) {
+                    select.options[i] = null;
+                }
+                for (let index = 0; index < Object.keys(data).length; index++) {
+                        var option = document.createElement("option");
+                        option.text = data[index];
+                        option.value = data[index];
+                        x.add(option);
+                    } 
+                });
+        }
+        
+</script>
+
+<!-- Add JavaScript Validation -->
+<script>
+  document.getElementById("MechanicForm").addEventListener("submit", function (event) {
+    const fileInput = document.getElementById("upload");
+    const errorMessage = document.getElementById("error-message");
+
+    if (!fileInput.value) {
+      event.preventDefault();
+      errorMessage.style.display = "block";
+    } else {
+      errorMessage.style.display = "none";
+    }
+  });
+</script>
+
+          <!-- Submit Container -->
+          <section class="submit-container">
+            <p>
+              By creating an account you agree to the Terms of use and Privacy
+              Policy.
+            </p>
+            <button type="submit" name="mechanic_submit">Create an account</button>
+          </section>
+        </form>
+      </section>
+
+      <!-- Social Media Login -->
+      {% comment %} <section class="nav-container">
+        <div class="divider">OR</div>
+        <nav>
+          <a href="#" class="social-media-link">
+            
+            
+            <img src="{% static 'image/facebook-logo.svg' %}" alt="facebook's logo" />
+            Sign up with Facebook
+          </a>
+          <a href="#" class="social-media-link">
+           
+            <img src="{% static 'image/google-logo.svg' %}" alt="google's logo" />
+            Sign up with Google
+          </a>
+        </nav>
+      </section> {% endcomment %}
+    </main>
+    <script
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
+        ></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous"
+        ></script>
+  </body>
+</html>

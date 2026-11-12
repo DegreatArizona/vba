@@ -1,0 +1,109 @@
+{% extends "driverbase.html" %}
+{% load static %}
+{% block content %}
+    <!-- Inherit header from dashboard -->
+    <main class="history container">
+      <h2 class="my-4">Request History</h2>
+      {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+      {% if requests %}
+      <section class="table-responsive mt-4">
+        <table id="historyTable" class="table table-striped table-hover table-borderless border-0">
+            <thead>
+                <tr>
+                    <th class="text-body-tertiary">Request ID</th>
+                    <th class="text-body-tertiary">Vehicle Information</th>
+                    <th class="text-body-tertiary">Problem Description</th>
+                    <th class="text-body-tertiary">Service Type</th>
+                    <th class="text-body-tertiary">Request Date</th>
+                    <th class="text-body-tertiary">Status</th>
+                    <th class="text-body-tertiary">Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for request in requests %}
+                <tr class="">
+                    <td>{{ request.id }}</td> <!-- Display the request ID -->
+                    <td>
+                        <span class="d-block">{{ request.vehicle_brand }} {{ request.vehicle_name }} {{ request.vehicle_model }}</span>
+                        <span class="d-block">License No: {{ request.vehicle_no }}</span>
+                    </td>
+                    <td>{{ request.problem_description }}</td>
+                    <td>{{ request.category }}</td> <!-- Assuming category represents service type -->
+                    <td>
+                        <span class="d-block">{{ request.date }}</span>
+                    </td>
+                    <td>
+                    {% if request.status == 'Approved' %}
+                        <span class="status table-success-status">{{ request.status }}</span>
+                    {% elif request.status == 'Pending' %}
+                        <span class="status table-danger-status">{{ request.status }}</span>
+                    {% elif request.status == 'Cancelled' %}
+                        <span class="status table-danger-status">{{ request.status }}</span>
+                    {% else %}
+                        <span class="status table-pending-status">{{ request.status }}</span>
+                    {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'request-detail' request.id %}" class="btn btn-outline-primary">
+                            View Details
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th class="text-body-tertiary">Request ID</th>
+                    <th class="text-body-tertiary">Vehicle Information</th>
+                    <th class="text-body-tertiary">Problem Description</th>
+                    <th class="text-body-tertiary">Service Type</th>
+                    <th class="text-body-tertiary">Request Date</th>
+                    <th class="text-body-tertiary">Status</th>
+                    <th class="text-body-tertiary">Action</th>
+                </tr>
+            </tfoot>
+        </table>
+      </section>
+      {% else %}
+      <section class="no-request mt-4">
+        <h2>No previous service requests found!</h2>
+        <img
+          src="{% static '/image/no-history.svg' %}"
+          class="img-fluid"
+          alt=""
+        />
+        
+        <a href="driver/request-service">Request Service</a>
+      </section>
+      {% endif %}
+    </main>
+    <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const link = document.querySelector(".reqh");
+
+    function updateLinkStyle() {
+      const size = window.innerWidth;
+      if (size <= 768) {
+        link.style.color = "rgba(10, 116, 218, 0.9)";
+        link.style.backgroundColor =  ""
+      } else {
+        link.style.backgroundColor = "rgba(10, 116, 218, 0.1)";
+        link.style.color = "rgba(10, 116, 218, 0.9)"; // Reset color if previously set
+      }
+    }
+
+    updateLinkStyle();
+
+  window.addEventListener("resize", updateLinkStyle);
+  });
+</script>
+{% endblock content %}
+  {% comment %} </body>
+</html> {% endcomment %}

@@ -1,0 +1,303 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --blue: rgba(10, 116, 218, 0.9);
+  --dark: rgba(33, 33, 33, 0.8);
+  --text-clr: rgba(33, 33, 33, 1);
+  --link-clr: rgba(13, 71, 161, 1);
+  --dark-blue-clr: rgb(0, 0, 139);
+}
+body {
+  font-family: "Montserrat", sans-serif;
+}
+#user-form-container {
+  max-width: 650px;
+  margin: 50px auto;
+  padding-inline: 18px;
+}
+#user-form-container header {
+  text-align: center;
+}
+#user-form-container header h2 {
+  font-weight: 700;
+  font-size: 2.1875rem; /* 35px */
+  color: var(--text-clr);
+}
+#user-form-container header p {
+  margin-block: 6px;
+  font-weight: 400;
+  color: var(--text-clr);
+  font-size: 1rem;
+}
+#user-form-container header a {
+  color: var(--link-clr);
+}
+
+/* Account Type Container */
+.account-type-container {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 48px;
+}
+.account-type-label {
+  position: relative;
+  padding-bottom: 6px;
+}
+.account-type-label::after {
+  content: "";
+  position: absolute;
+  width: 120%;
+  height: 2px;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  background-color: var(--text-clr);
+}
+.radio-control,
+.checkbox-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+/* Form Container */
+.form-group {
+  position: relative;
+  width: 100%;
+  /*min-height: 135vh; */ /* to be determined dynamically */
+  transition: 0.6s;
+  overflow: hidden;
+}
+#DriverForm,
+#MechanicForm {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  /* visibility: none; */
+  transition: 0.6s;
+}
+#DriverForm {
+  left: 100%;
+}
+#MechanicForm {
+  left: -100%;
+}
+
+/* When Account Type is Selected */
+#DriverForm.active,
+#MechanicForm.active {
+  left: 0;
+  visibility: visible;
+}
+
+/* Form Fields */
+.input-field {
+  margin-top: 30px;
+}
+.input-label {
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-clr);
+}
+.input-field input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 1rem;
+  border: 1px solid var(--dark);
+}
+.password-container {
+  display: flex;
+  justify-content: space-between;
+}
+.password-container span {
+  color: var(--dark);
+  cursor: pointer;
+}
+.input-field small {
+  color: var(--dark);
+  font-weight: 400;
+  font-size: 0.875rem; /* 14px */
+}
+.submit-container {
+  margin-block: 28px;
+}
+.submit-container p {
+  margin-bottom: 10px;
+  color: var(--dark);
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+.submit-container button {
+  display: block;
+  width: 100%;
+  color: white;
+  background-color: var(--blue);
+  padding-block: 12px;
+  border-radius: 22px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: "Montserrat", sans-serif;
+  transition: 0.6s;
+}
+.submit-container button:hover {
+  background-color: var(--dark-blue-clr);
+}
+
+/* Mechanic Detail fields */
+.specialty-container {
+  margin-block: 24px;
+}
+.specialty-container h3 {
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--dark);
+}
+.specialty-container h3,
+.license h3 {
+  font-size: 1.05rem;
+  margin-bottom: 15px;
+  letter-spacing: -0.5px;
+}
+.specialties {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.specialties .checkbox-control {
+  gap: 8px;
+}
+.specialties .input-label {
+  font-size: 0.9rem;
+}
+.license {
+  display: flex;
+  gap: 10px;
+}
+.license h3 {
+  width: fit-content;
+}
+.upload-container {
+  width: 70%;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.upload-label {
+  width: 35%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.tips-group {
+  width: 65%;
+  display: flex;
+  gap: 10px;
+}
+.license .tips {
+  display: inline-block;
+  padding: 5px;
+  border-radius: 6px;
+  color: var(--blue);
+  font-weight: 600;
+  font-size: 0.9rem;
+  background-color: rgba(10, 116, 218, 0.1);
+}
+
+/* Nav Container */
+.divider {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  display: inline-block;
+  background-color: var(--dark);
+  width: 100%;
+  height: 2px;
+}
+.nav-container {
+  margin-block: 30px;
+}
+.nav-container nav {
+  display: flex;
+  gap: 30px;
+}
+.social-media-link {
+  border: 1px solid var(--dark);
+  border-radius: 20px;
+  font-size: 1rem;
+  font-family: "Montserrat", sans-serif;
+  text-decoration: none;
+  padding: 10px;
+  color: var(--dark);
+  flex-basis: 50%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.social-media-link:hover {
+  background-color: rgba(224, 224, 224, 0.555);
+}
+.social-media-link img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsiveness - Media Query */
+@media screen and (max-width: 560px) {
+  .license {
+    flex-direction: column;
+  }
+  .upload-container {
+    align-self: center;
+    width: 100%;
+  }
+  .nav-container nav {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+@media screen and (max-width: 420px) {
+  .upload-container {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .upload-label,
+  .tips-group {
+    width: 100%;
+  }
+  .tips-group {
+    justify-content: center;
+  }
+}
+@media screen and (max-width: 290px) {
+  .account-type-container {
+    gap: 20px;
+  }
+  .radio-control,
+  .checkbox-control {
+    gap: 8px;
+  }
+}

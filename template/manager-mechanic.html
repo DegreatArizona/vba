@@ -1,0 +1,158 @@
+{% extends "managerbase.html" %}
+{% load static %}
+{% load request_filter %}
+{% block content %}
+    <!-- Inherit header from dashboard -->
+    <main class="main-content offset-md-3 col-md-9 offset-lg-2 col-lg-10">
+      <h2 class="my-4 page-title">My Mechanics</h2>
+      {% if  messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+        {% endif %}
+    
+    {% if manager.is_pro == False %}
+ <div>
+    <select onchange="selectLGA(this)" class="form-control" id="state">
+       <option value="" selected="selected">- Select State -</option>
+    </select>
+    <select class="form-control" id="lga">
+       <option>Select LGA</option>
+    </select>
+  </div>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+  // Fetch all states
+  fetch("https://nga-states-lga.onrender.com/fetch")
+    .then((res) => res.json())
+    .then((data) => {
+      const stateDropdown = document.getElementById("state");
+      data.forEach((state) => {
+        const option = document.createElement("option");
+        option.value = state;
+        option.text = state;
+        stateDropdown.add(option);
+      });
+    });
+
+  // Fetch LGAs based on selected state
+  document.getElementById("state").addEventListener("change", (event) => {
+    const state = event.target.value;
+    const lgaDropdown = document.getElementById("lga");
+    lgaDropdown.innerHTML = "<option>Select LGA</option>"; // Reset options
+
+    if (state) {
+      fetch(`https://nga-states-lga.onrender.com/?state=${state}`)
+        .then((res) => res.json())
+        .then((data) => {
+          data.forEach((lga) => {
+            const option = document.createElement("option");
+            option.value = lga;
+            option.text = lga;
+            lgaDropdown.add(option);
+          });
+        });
+    }
+  });
+
+  // Handle sorting mechanics based on selected state and LGA
+  document.getElementById("lga").addEventListener("change", () => {
+    const state = document.getElementById("state").value;
+    const lga = document.getElementById("lga").value;
+
+    if (state && lga) {
+      // Redirect with query parameters for sorting
+      window.location.href = `?state=${state}&local_government=${lga}`;
+    }
+  });
+});
+
+    
+  </script>
+    {% if mechanics %}
+
+<div class="container mt-4">
+    <div class="row g-4">
+        {% for mechanic in mechanics %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card" style="border-radius: 15px;">
+                <div class="card-body p-3">
+                    <div class="text-center">
+                        <div class="card-image">
+                            {% if mechanic.profile_pic.url %}
+                            <img src="{{mechanic.profile_pic.url}}" alt="Mechanic" class="img-fluid" style="width: 180px; height: 180px; border-radius: 50%;">
+                            {% else %}
+                            <img src="{% static 'image/mechanic.png' %}" alt="Mechanic" class="img-fluid" style="width: 180px; height: 180px; border-radius: 50%;">
+                            {% endif %}
+                        </div>
+                        <div class="mt-3">
+                            <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-1">{{ mechanic.user.first_name }} {{ mechanic.user.last_name }}</h5>
+                            <h6 class="mb-1">Contact Info:</h6>
+                            <div style="line-height:10px;">
+                                <p class="mb-2 pb-1">{{ mechanic.mobile }}</p>
+                                <p class="mb-2 pb-1">{{ mechanic.user.email }}</p>
+                            </div>
+                            <h6 class="mb-1">Address:</h6>
+                            <div style="line-height:10px;">
+                                <p class="mb-2 pb-1">{{ mechanic.state }}</p>
+                                <p class="mb-2 pb-1">{{ mechanic.local_government }}</p>
+                            </div>
+                            <h6 class="mb-1">Services offered:</h6>
+                                <p class="mb-2 pb-1">{{ mechanic.service }}</p>
+                            </div>
+                            <div class="d-flex justify-content-between bg-light p-2 rounded-3 mt-3">
+                                <div>
+                                    <p class="small text-muted mb-1">Work Completed</p>
+                                    <p class="mb-0">{{ work_completed|get_item:mechanic.id }}</p>
+                                </div>
+                                <div>
+                                    <p class="small text-muted mb-1">Work In Progress</p>
+                                    <p class="mb-0">{{ work_in_progress|get_item:mechanic.id }}</p>
+                                </div>
+                                <div>
+                                    <p class="small text-muted mb-1">Customer's Rating</p>
+                                    <p class="mb-0">{{ mechanic.rating }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+    
+    {% else %}
+    {% endif %}
+    {% else %}
+    {% endif %}
+    </main>
+    <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const link = document.querySelector(".pro");
+
+    function updateLinkStyle() {
+      const size = window.innerWidth;
+      if (size <= 768) {
+        link.style.color = "rgba(10, 116, 218, 0.9)";
+        link.style.backgroundColor =  ""
+      } else {
+        link.style.backgroundColor = "rgba(10, 116, 218, 0.1)";
+        link.style.color = "rgba(10, 116, 218, 0.9)"; // Reset color if previously set
+      }
+    }
+
+    updateLinkStyle();
+
+  window.addEventListener("resize", updateLinkStyle);
+  });
+</script>
+{% endblock content %}
+  {% comment %} </body>
+</html> {% endcomment %}
