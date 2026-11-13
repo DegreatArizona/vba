@@ -151,7 +151,7 @@ export function SignInScreen() {
           />
 
           <Text style={[styles.footerNote, compact && styles.footerNoteCompact]}>
-            Account registration is managed by Auto Aid. New service requests will be available when the API supports them.
+            Account registration is managed by Auto Aid. Sign in to create requests and follow assigned work.
           </Text>
         </View>
       </KeyboardAvoidingView>

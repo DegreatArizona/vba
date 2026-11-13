@@ -42,7 +42,38 @@ export default function AppTabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="queue"
+        options={{
+          title: "Queue",
+          href: user.role === "manager" ? undefined : null,
+          tabBarAccessibilityLabel: "State-scoped manager request queue",
+          tabBarIcon: ({ color }) => (
+            <SymbolView
+              name={{ ios: "tray.full", android: "inbox", web: "inbox" }}
+              tintColor={color}
+              size={22}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="team"
+        options={{
+          title: "Team",
+          href: user.role === "manager" ? undefined : null,
+          tabBarAccessibilityLabel: "Manager mechanic team",
+          tabBarIcon: ({ color }) => (
+            <SymbolView
+              name={{ ios: "person.2", android: "group", web: "group" }}
+              tintColor={color}
+              size={22}
+            />
+          ),
+        }}
+      />
       <Tabs.Screen name="request-details" options={{ href: null }} />
+      <Tabs.Screen name="request-assistance" options={{ href: null }} />
       <Tabs.Screen
         name="notifications"
         options={{

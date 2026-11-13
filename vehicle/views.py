@@ -30,6 +30,7 @@ from binascii import hexlify as hexa
 from django.http import JsonResponse
 from .onesignal_service import send_notification
 from .utils import send_html_email, generate_token, verify_token
+from .request_services import RequestCreationConflict, create_driver_request
 from django.contrib.auth.hashers import make_password
 from .decorators import email_verified_required, request_assigned_to_user
 from django.utils.timezone import localtime
@@ -1031,83 +1032,33 @@ def requestHistory(request):
 @user_passes_test(is_driver)
 @email_verified_required
 def requestService(request):
-    driver=models.Driver.objects.get(user_id = request.user.id)
-    managers = models.Manager.objects.filter(is_pro=True)
-    if request.method == 'POST':
+    driver = models.Driver.objects.get(user_id=request.user.id)
+    if request.method == "POST":
+        values = {
+            "vehicle_no": request.POST.get("vehicle_no"),
+            "vehicle_name": request.POST.get("vehicle_name"),
+            "problem_description": request.POST.get("problem_description"),
+            "category": request.POST.get("category"),
+            "state": request.POST.get("state"),
+            "location": request.POST.get("location"),
+            "mobile": request.POST.get("mobile"),
+        }
         try:
-            if Request.objects.filter(driver=request.user.driver, status="Pending").exists():
-                messages.warning(request, "You have a pending request")
-                return redirect('driver-dashboard')
-            elif Request.objects.filter(driver=request.user.driver, status="Approved").exists():
-                messages.warning(request, "You have an approved request")
-                return redirect('driver-dashboard')
-            elif Request.objects.filter(driver=request.user.driver, status="Accepted").exists():
-                messages.warning(request, "You have a request in repair")
-                return redirect('driver-dashboard')
-            elif Request.objects.filter(driver=request.user.driver, status="Done").exists():
-                messages.warning(request, "Please pay off any pending invoice before requesting new service")
-                return redirect('driver-dashboard')
-            elif Request.objects.filter(driver=request.user.driver, invoice="Pending").exists():
-                messages.warning(request, "Please pay off any pending invoice before requesting new service")
-                return redirect('driver-invoice-history')
-            else:
-                new_request = Request(
-                    vehicle_no=request.POST.get('vehicle_no'),
-                    vehicle_name=request.POST.get('vehicle_name'),
-                    problem_description=request.POST.get('problem_description'),
-                    category=request.POST.get('category'),
-                    state=request.POST.get('state'),
-                    location=request.POST.get('location'), 
-                    mobile=request.POST.get('mobile'), 
-                    driver=driver,
-                    status='Pending',
-                )
-                new_request.save()
-                notify = DriverNotification(
-                    driver=request.user.driver,
-                    message=f"Request for {new_request.category} at {new_request.location} have been created and awaiting admin approval."
-                )
-                notify.save()
-                notify_users(new_request.category, new_request.location)
-                send_html_email(
-                    subject="Request Sent Successfully",
-                    template_name="mails/request_posted.html",
-                    context={"user": driver.user, "request": new_request},
-                    recipient_list=[driver.user.email],
-                )
-                send_html_email(
-                    subject="New Request Posted",
-                    template_name="mails/new_user_request.html",
-                    context={"user": driver.user, "request":new_request},
-                    recipient_list=[settings.EMAIL_HOST_NAME],
-                )
-                sms_users = [manager.mobile for manager in managers if manager.mobile]
-                for phone_number in sms_users:
-                    try:
-                        url = f"{settings.TERMII_BASE_URL}/api/sms/send/bulk"
-                        payload = {
-                                "to": phone_number,
-                                "from": "Auto Aid",
-                                "sms": f"Hello manager! \n A new request with ID { new_request.id } at {new_request.location} by {driver.user.first_name} {driver.user.last_name} was posted successfully. \n Review and assign the request!",
-                                "type": "plain",
-                                "channel": "generic",
-                                "api_key": settings.TERMII_SMS_API,
-                            }
-                        headers = {
-                        'Content-Type': 'application/json',
-                        }
-                        response = requests.request("POST", url, headers=headers, json=payload)
-                        print(response.text)
-                        print(phone_number)
-                    except Exception as e:
-                        print(f"An Error ocured details: {e}")
-                messages.success(request, "Your request has been created and is awaiting admin approval.")
-                return HttpResponseRedirect(reverse('driver-dashboard'))
-        except Exception as e:
-            print(e)
-            messages.warning(request, f"Error: {e}")
+            create_driver_request(driver=driver, values=values)
+        except RequestCreationConflict as conflict:
+            messages.warning(request, conflict.detail)
+            if conflict.code == "pending_invoice":
+                return redirect("driver-invoice-history")
+            return redirect("driver-dashboard")
+        except Exception:
+            logger.exception("Unable to create a driver service request")
+            messages.warning(request, "We could not create your request. Please try again.")
+            return redirect("driver-dashboard")
 
-    return render(request, 'driver-request-service.html', {'driver':driver,},)
+        messages.success(request, "Your request has been created and is awaiting admin approval.")
+        return HttpResponseRedirect(reverse("driver-dashboard"))
+
+    return render(request, "driver-request-service.html", {"driver": driver})
 
 def notify_users(category, location):
     """
