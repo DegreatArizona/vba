@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import useSWR from "swr";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { PrimaryButton } from "./PrimaryButton";
-import { ApiError, getApiConfigurationIssue, getRequest, isApiConfigured } from "../lib/api";
+import { ApiError, getApiConfigurationIssue, getRequest, isApiConfigured, performMechanicRequestAction } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { colors } from "../lib/theme";
-import type { ServiceRequest } from "../lib/types";
+import type { MechanicRequestAction, ServiceRequest } from "../lib/types";
 
 const progressStages = [
   "Request received",
@@ -47,6 +47,47 @@ function progressIndex(status: string): number {
   if (value.includes("accept") || value.includes("assign")) return 2;
   if (value.includes("approv")) return 1;
   return 0;
+}
+
+interface MechanicActionInfo {
+  action: MechanicRequestAction;
+  label: string;
+  description: string;
+}
+
+function mechanicActionForStatus(status: string): MechanicActionInfo | null {
+  switch (status.toLowerCase()) {
+    case "approved":
+      return {
+        action: "accept",
+        label: "Accept assignment",
+        description: "Confirm that you can take this assigned job.",
+      };
+    case "accepted":
+      return {
+        action: "start",
+        label: "Start work",
+        description: "Start the repair when you arrive at the vehicle.",
+      };
+    case "repairing":
+      return {
+        action: "complete",
+        label: "Mark work complete",
+        description: "Confirm that the requested service work is finished.",
+      };
+    default:
+      return null;
+  }
+}
+
+function mechanicStatusNote(status: string): string {
+  const normalized = status.toLowerCase();
+  if (normalized === "pending") return "This assignment is waiting for manager approval.";
+  if (normalized === "done") {
+    return "Work is complete. Payment and release are handled outside this mobile workflow.";
+  }
+  if (normalized === "released" || normalized === "cancelled") return "This job is closed.";
+  return "No work action is available for this request status.";
 }
 
 function StatePanel({ title, body }: { title: string; body: string }) {
@@ -124,6 +165,8 @@ function ProgressCard({ status }: { status: string }) {
 export function RequestDetailScreen({ requestId }: RequestDetailScreenProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const [actionInProgress, setActionInProgress] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const parsedId = /^\d+$/.test(requestId) ? Number(requestId) : Number.NaN;
   const validId = Number.isSafeInteger(parsedId) && parsedId > 0;
   const canReadRequests = Boolean(
@@ -138,6 +181,19 @@ export function RequestDetailScreen({ requestId }: RequestDetailScreenProps) {
     () => getRequest(parsedId),
     { revalidateOnFocus: false, revalidateOnReconnect: false, shouldRetryOnError: false },
   );
+
+  async function handleMechanicAction(action: MechanicRequestAction) {
+    setActionError(null);
+    setActionInProgress(true);
+    try {
+      await performMechanicRequestAction(parsedId, action);
+      await mutate();
+    } catch (caught) {
+      setActionError(caught instanceof ApiError ? caught.message : "The job update could not be completed.");
+    } finally {
+      setActionInProgress(false);
+    }
+  }
 
   const page = (content: ReactNode) => (
     <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -225,6 +281,29 @@ export function RequestDetailScreen({ requestId }: RequestDetailScreenProps) {
       </View>
 
       <ProgressCard status={status} />
+
+      {user.role === "mechanic" ? (
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Work actions</Text>
+          <Text style={styles.actionDescription}>
+            {mechanicActionForStatus(status)?.description ?? mechanicStatusNote(status)}
+          </Text>
+          {actionError ? (
+            <Text accessibilityRole="alert" style={styles.actionError}>{actionError}</Text>
+          ) : null}
+          {mechanicActionForStatus(status) ? (
+            <PrimaryButton
+              label={mechanicActionForStatus(status)?.label ?? "Update job"}
+              loading={actionInProgress}
+              disabled={actionInProgress}
+              onPress={() => {
+                const action = mechanicActionForStatus(status);
+                if (action) void handleMechanicAction(action.action);
+              }}
+            />
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Vehicle and location</Text>
@@ -425,6 +504,16 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     fontSize: 14,
     lineHeight: 22,
+  },
+  actionDescription: {
+    color: colors.inkSoft,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  actionError: {
+    color: colors.red,
+    fontSize: 13,
+    lineHeight: 19,
   },
   emptyUpdate: {
     color: colors.muted,

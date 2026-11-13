@@ -1,5 +1,5 @@
 import { clearStoredTokens, readStoredTokens, writeStoredTokens } from "./token-storage";
-import type { LoginResponse, MobileUser, NotificationPage, RequestPage, ServiceRequest, TokenPair } from "./types";
+import type { LoginResponse, ManagerMechanicPage, ManagerQueuePage, MechanicRequestAction, MobileUser, NotificationPage, RequestCreateInput, RequestPage, ServiceRequest, TokenPair } from "./types";
 
 const configuredOrigin = (process.env.EXPO_PUBLIC_API_BASE_URL ?? "").trim().replace(/\/+$/, "");
 
@@ -64,9 +64,17 @@ async function parseJson(response: Response): Promise<unknown> {
 }
 
 function responseMessage(payload: unknown, fallback: string): string {
-  if (typeof payload === "object" && payload !== null && "detail" in payload) {
-    const detail = (payload as { detail?: unknown }).detail;
-    if (typeof detail === "string") return detail;
+  if (typeof payload === "object" && payload !== null) {
+    if ("detail" in payload) {
+      const detail = (payload as { detail?: unknown }).detail;
+      if (typeof detail === "string") return detail;
+    }
+    for (const [field, errors] of Object.entries(payload)) {
+      if (Array.isArray(errors)) {
+        const message = errors.find((item): item is string => typeof item === "string");
+        if (message) return `${field}: ${message}`;
+      }
+    }
   }
   return fallback;
 }
@@ -191,8 +199,51 @@ export function getNotificationPage(path: string): Promise<NotificationPage> {
   return performRequest<NotificationPage>(path, {}, true, true);
 }
 
+export function getManagerMechanicPage(page: number, pageSize = 20): Promise<ManagerMechanicPage> {
+  return performRequest<ManagerMechanicPage>(
+    `/api/v1/manager/mechanics/?page=${page}&page_size=${pageSize}`,
+    {},
+    true,
+    true,
+  );
+}
+
+export function getManagerQueuePage(page: number): Promise<ManagerQueuePage> {
+  return performRequest<ManagerQueuePage>(`/api/v1/manager/queue/?page=${page}`, {}, true, true);
+}
+
+export function claimManagerRequest(requestId: number, mechanicId: number): Promise<ServiceRequest> {
+  return performRequest<ServiceRequest>(
+    `/api/v1/manager/queue/${requestId}/claim/`,
+    { method: "POST", body: JSON.stringify({ mechanic_id: mechanicId }) },
+    true,
+    true,
+  );
+}
+
 export function getRequest(requestId: number): Promise<ServiceRequest> {
   return performRequest<ServiceRequest>(`/api/v1/requests/${requestId}/`, {}, true, true);
+}
+
+export function createRequest(input: RequestCreateInput): Promise<ServiceRequest> {
+  return performRequest<ServiceRequest>(
+    "/api/v1/requests/",
+    { method: "POST", body: JSON.stringify(input) },
+    true,
+    true,
+  );
+}
+
+export function performMechanicRequestAction(
+  requestId: number,
+  action: MechanicRequestAction,
+): Promise<ServiceRequest> {
+  return performRequest<ServiceRequest>(
+    `/api/v1/requests/${requestId}/actions/`,
+    { method: "POST", body: JSON.stringify({ action }) },
+    true,
+    true,
+  );
 }
 
 async function sendLogout(tokens: TokenPair): Promise<Response> {

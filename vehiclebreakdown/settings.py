@@ -134,6 +134,9 @@ REST_FRAMEWORK = {
   'user': '120/minute',
   'auth_login': '5/minute',
   'auth_refresh': '20/minute',
+    'request_create': '5/hour',
+    'request_action': '30/hour',
+    'manager_claim': '20/hour',
   },
 }
 

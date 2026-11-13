@@ -49,7 +49,9 @@ export function RequestDashboard() {
   const requests = useMemo(() => data?.flatMap((page) => page.results) ?? [], [data]);
   const activeCount = requests.filter((request) => {
     const status = request.status.toLowerCase();
-    return !status.includes("complete") && !status.includes("closed") && !status.includes("cancel");
+    return !["complete", "closed", "cancel", "released"].some((finishedStatus) =>
+      status.includes(finishedStatus),
+    );
   }).length;
   const lastPage = data?.[data.length - 1];
   const copy = user ? roleCopy[user.role] : roleCopy.driver;
@@ -113,6 +115,18 @@ export function RequestDashboard() {
           <Text style={styles.description}>{copy.description}</Text>
         </View>
 
+        {user.role === "driver" ? (
+          <View style={styles.requestAction}>
+            <PrimaryButton
+              label="Request roadside assistance"
+              onPress={() => router.push("/(app)/request-assistance")}
+            />
+            <Text style={styles.requestActionNote}>
+              Describe the problem and location. Pricing and payment are handled after review.
+            </Text>
+          </View>
+        ) : null}
+
         <View style={styles.metricsRow}>
           <MetricCard label="REQUESTS" value={String(requests.length)} />
           <MetricCard label="ACTIVE" value={String(activeCount)} accent />
@@ -163,7 +177,7 @@ export function RequestDashboard() {
         ) : (
           <StateCard
             title="No requests to show yet"
-            body="This first mobile release shows existing requests. New request creation will be added when the API supports it."
+            body="Start a roadside service request and track its review here."
             compact
           />
         )}
@@ -268,6 +282,14 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 14,
     lineHeight: 21,
+  },
+  requestAction: {
+    gap: 8,
+  },
+  requestActionNote: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 18,
   },
   metricsRow: {
     flexDirection: "row",

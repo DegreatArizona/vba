@@ -102,8 +102,73 @@ class RequestReadSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class RequestCreateSerializer(serializers.Serializer):
+    category = serializers.ChoiceField(choices=Request._meta.get_field("category").choices)
+    vehicle_no = serializers.CharField(max_length=150, trim_whitespace=True)
+    vehicle_name = serializers.CharField(max_length=140, trim_whitespace=True)
+    problem_description = serializers.CharField(max_length=500, trim_whitespace=True)
+    state = serializers.CharField(max_length=255, trim_whitespace=True)
+    location = serializers.CharField(max_length=255, trim_whitespace=True)
+    mobile = serializers.CharField(max_length=40, trim_whitespace=True)
+    latitude = serializers.FloatField(required=False, allow_null=True, min_value=-90, max_value=90)
+    longitude = serializers.FloatField(required=False, allow_null=True, min_value=-180, max_value=180)
+
+    def validate(self, attrs):
+        latitude = attrs.get("latitude")
+        longitude = attrs.get("longitude")
+        if (latitude is None) != (longitude is None):
+            raise serializers.ValidationError(
+                {"latitude": "Provide latitude and longitude together, or omit both."}
+            )
+        return attrs
+
+
+class MechanicRequestActionSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(choices=("accept", "start", "complete"))
+
+
 class NotificationReadSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     message = serializers.CharField(read_only=True)
     timestamp = serializers.DateTimeField(read_only=True)
     is_read = serializers.BooleanField(read_only=True)
+
+
+class ManagerMechanicSummarySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    full_name = serializers.CharField()
+    union_name = serializers.CharField(allow_blank=True, allow_null=True)
+    state = serializers.CharField(allow_blank=True, allow_null=True)
+    local_government = serializers.CharField(allow_blank=True, allow_null=True)
+    is_approved = serializers.BooleanField()
+    can_be_assigned = serializers.BooleanField()
+    assigned_request_count = serializers.IntegerField()
+    active_request_count = serializers.IntegerField()
+
+
+class ManagerMechanicPageSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    next = serializers.URLField(allow_null=True)
+    previous = serializers.URLField(allow_null=True)
+    results = ManagerMechanicSummarySerializer(many=True)
+
+
+class ManagerQueueRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Request
+        fields = (
+            "id",
+            "category",
+            "vehicle_no",
+            "vehicle_name",
+            "location",
+            "state",
+            "problem_description",
+            "status",
+            "date",
+        )
+        read_only_fields = fields
+
+
+class ManagerRequestClaimSerializer(serializers.Serializer):
+    mechanic_id = serializers.IntegerField(min_value=1)

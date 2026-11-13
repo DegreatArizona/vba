@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
+from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -72,7 +73,7 @@ class MobileApiTests(TestCase):
         self.client = APIClient()
 
     @staticmethod
-    def make_request(*, driver, mechanic=None, manager=None):
+    def make_request(*, driver, mechanic=None, manager=None, state=None, status="Pending"):
         return Request.objects.create(
             category="Tire Repair",
             vehicle_no="ABC-123",
@@ -82,6 +83,8 @@ class MobileApiTests(TestCase):
             driver=driver,
             mechanic=mechanic,
             manager=manager,
+            state=state,
+            status=status,
         )
 
     def authenticate_as(self, user):
@@ -92,6 +95,24 @@ class MobileApiTests(TestCase):
         self.assertEqual(self.client.get("/api/v1/me/").status_code, 401)
         self.assertEqual(self.client.get("/api/v1/requests/").status_code, 401)
         self.assertEqual(self.client.get("/api/v1/notifications/").status_code, 401)
+        self.assertEqual(self.client.get("/api/v1/manager/mechanics/").status_code, 401)
+        self.assertEqual(self.client.get("/api/v1/manager/queue/").status_code, 401)
+        self.assertEqual(
+            self.client.post(
+                "/api/v1/manager/queue/1/claim/",
+                {"mechanic_id": 1},
+                format="json",
+            ).status_code,
+            401,
+        )
+        self.assertEqual(
+            self.client.post(
+                "/api/v1/requests/1/actions/",
+                {"action": "accept"},
+                format="json",
+            ).status_code,
+            401,
+        )
         self.assertEqual(
             self.client.get(f"/api/v1/requests/{self.driver_request.pk}/").status_code,
             401,
@@ -345,7 +366,7 @@ class MobileApiTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    def test_mobile_profile_and_request_collection_are_read_only(self):
+    def test_profile_and_request_detail_updates_are_read_only(self):
         self.authenticate_as(self.driver_user)
 
         profile_update = self.client.patch(
@@ -361,8 +382,333 @@ class MobileApiTests(TestCase):
         )
 
         self.assertEqual(profile_update.status_code, 405)
-        self.assertEqual(request_create.status_code, 405)
+        self.assertEqual(request_create.status_code, 400)
         self.assertEqual(request_update.status_code, 405)
+
+    def test_verified_driver_can_create_a_pending_request_without_client_controlled_fields(self):
+        outside_state_user = User.objects.create_user(
+            username="manager-outside-state", password="StrongPassword123!"
+        )
+        outside_state_manager = Manager.objects.create(
+            user=outside_state_user,
+            state="Ogun",
+            status=True,
+            is_email_verified=True,
+        )
+        for existing_request in (self.driver_request, self.other_mechanic_request):
+            existing_request.status = "Released"
+            existing_request.invoice = "Paid"
+            existing_request.save(update_fields=["status", "invoice"])
+        self.authenticate_as(self.driver_user)
+        payload = {
+            "category": "Tire Repair",
+            "vehicle_no": "ABC-123",
+            "vehicle_name": "Toyota Corolla",
+            "problem_description": "A flat tire on the rear passenger side.",
+            "state": "Lagos",
+            "location": "Victoria Island, near the waterfront",
+            "mobile": "+2348000000001",
+            "status": "Approved",
+            "driver": self.other_driver.pk,
+            "manager": self.manager.pk,
+            "cost": 999999,
+            "invoice": "Paid",
+        }
+
+        with patch("vehicle.request_services.dispatch_request_created_notifications") as dispatch:
+            with self.captureOnCommitCallbacks(execute=True) as callbacks:
+                response = self.client.post("/api/v1/requests/", payload, format="json")
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(callbacks), 1)
+        created = Request.objects.get(pk=response.data["id"])
+        dispatch.assert_called_once_with(created.pk)
+        self.assertEqual(created.driver, self.driver)
+        self.assertEqual(created.status, "Pending")
+        self.assertEqual(created.cost, 0)
+        self.assertEqual(created.invoice, "Pending")
+        self.assertIsNone(created.manager)
+        self.assertIsNone(created.latitude)
+        self.assertIsNone(created.longitude)
+        self.assertEqual(
+            DriverNotification.objects.filter(driver=self.driver).count(),
+            1,
+        )
+        self.assertTrue(
+            ManagerNotification.objects.filter(
+                manager=self.manager,
+                message__contains=f"request #{created.pk}",
+            ).exists()
+        )
+        self.assertFalse(
+            ManagerNotification.objects.filter(manager=self.other_manager).exists()
+        )
+        self.assertFalse(
+            ManagerNotification.objects.filter(manager=outside_state_manager).exists()
+        )
+
+    def test_driver_request_creation_rejects_active_requests_and_invalid_categories(self):
+        self.authenticate_as(self.driver_user)
+        payload = {
+            "category": "Tire Repair",
+            "vehicle_no": "ABC-123",
+            "vehicle_name": "Toyota Corolla",
+            "problem_description": "A flat tire on the rear passenger side.",
+            "state": "Lagos",
+            "location": "Victoria Island, near the waterfront",
+            "mobile": "+2348000000001",
+        }
+
+        conflict = self.client.post("/api/v1/requests/", payload, format="json")
+        invalid = self.client.post(
+            "/api/v1/requests/",
+            {**payload, "category": "An unsupported service"},
+            format="json",
+        )
+
+        self.assertEqual(conflict.status_code, 409)
+        self.assertEqual(conflict.data["code"], "active_request")
+        self.assertEqual(invalid.status_code, 400)
+        self.assertEqual(Request.objects.filter(driver=self.driver).count(), 2)
+
+    def test_only_verified_drivers_can_create_requests(self):
+        payload = {
+            "category": "Tire Repair",
+            "vehicle_no": "ABC-123",
+            "vehicle_name": "Toyota Corolla",
+            "problem_description": "A flat tire on the rear passenger side.",
+            "state": "Lagos",
+            "location": "Victoria Island, near the waterfront",
+            "mobile": "+2348000000001",
+        }
+
+        for user in (self.mechanic_user, self.manager_user, self.other_driver_user):
+            self.authenticate_as(user)
+            response = self.client.post("/api/v1/requests/", payload, format="json")
+            self.assertEqual(response.status_code, 403)
+
+        self.assertEqual(Request.objects.count(), 3)
+
+    def test_assigned_mechanic_can_accept_start_and_complete_without_changing_price(self):
+        self.driver_request.status = "Approved"
+        self.driver_request.cost = 1250
+        self.driver_request.save(update_fields=["status", "cost"])
+        original_cost = self.driver_request.cost
+        self.authenticate_as(self.mechanic_user)
+
+        with patch("vehicle.request_services.dispatch_mechanic_action_notifications") as dispatch:
+            for action, expected_status in (
+                ("accept", "Accepted"),
+                ("start", "Repairing"),
+                ("complete", "Done"),
+            ):
+                with self.captureOnCommitCallbacks(execute=True) as callbacks:
+                    response = self.client.post(
+                        f"/api/v1/requests/{self.driver_request.pk}/actions/",
+                        {"action": action},
+                        format="json",
+                    )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.data["status"], expected_status)
+                self.assertEqual(len(callbacks), 1)
+
+        self.driver_request.refresh_from_db()
+        self.assertEqual(self.driver_request.status, "Done")
+        self.assertEqual(self.driver_request.cost, original_cost)
+        self.assertIsNotNone(self.driver_request.estimated_completion_date)
+        self.assertEqual(dispatch.call_count, 3)
+        self.assertEqual(MechanicNotification.objects.filter(mechanic=self.mechanic).count(), 3)
+        self.assertEqual(DriverNotification.objects.filter(driver=self.driver).count(), 3)
+
+    def test_mechanic_actions_are_scoped_and_require_valid_transitions(self):
+        self.authenticate_as(self.mechanic_user)
+        response = self.client.post(
+            f"/api/v1/requests/{self.other_mechanic_request.pk}/actions/",
+            {"action": "accept"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 404)
+
+        self.driver_request.status = "Approved"
+        self.driver_request.save(update_fields=["status"])
+        response = self.client.post(
+            f"/api/v1/requests/{self.driver_request.pk}/actions/",
+            {"action": "complete"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 409)
+        self.driver_request.refresh_from_db()
+        self.assertEqual(self.driver_request.status, "Approved")
+
+    def test_mechanic_actions_require_an_approved_verified_mechanic(self):
+        self.mechanic.status = False
+        self.mechanic.save(update_fields=["status"])
+        self.authenticate_as(self.mechanic_user)
+        response = self.client.post(
+            f"/api/v1/requests/{self.driver_request.pk}/actions/",
+            {"action": "accept"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 403)
+
+        self.mechanic.status = True
+        self.mechanic.is_email_verified = False
+        self.mechanic.save(update_fields=["status", "is_email_verified"])
+        response = self.client.post(
+            f"/api/v1/requests/{self.driver_request.pk}/actions/",
+            {"action": "accept"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_manager_team_is_scoped_and_returns_only_safe_profile_data(self):
+        self.mechanic.my_manager = self.manager
+        self.mechanic.save(update_fields=["my_manager"])
+        self.other_mechanic.my_manager = self.other_manager
+        self.other_mechanic.save(update_fields=["my_manager"])
+        self.driver_request.status = "Repairing"
+        self.driver_request.save(update_fields=["status"])
+        self.authenticate_as(self.manager_user)
+
+        response = self.client.get("/api/v1/manager/mechanics/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(len(response.data["results"]), 1)
+        mechanic = response.data["results"][0]
+        self.assertEqual(mechanic["id"], self.mechanic.pk)
+        self.assertTrue(mechanic["is_approved"])
+        self.assertFalse(mechanic["can_be_assigned"])
+        self.assertEqual(mechanic["assigned_request_count"], 1)
+        self.assertEqual(mechanic["active_request_count"], 1)
+        self.assertNotIn("mobile", mechanic)
+        self.assertNotIn("account_number", mechanic)
+        self.assertNotIn("business_license", mechanic)
+
+    def test_manager_team_requires_verified_and_approved_manager(self):
+        self.authenticate_as(self.manager_user)
+        self.manager.status = False
+        self.manager.save(update_fields=["status"])
+        response = self.client.get("/api/v1/manager/mechanics/")
+        self.assertEqual(response.status_code, 403)
+
+        self.manager.status = True
+        self.manager.is_email_verified = False
+        self.manager.save(update_fields=["status", "is_email_verified"])
+        response = self.client.get("/api/v1/manager/mechanics/")
+        self.assertEqual(response.status_code, 403)
+
+    def test_manager_queue_only_returns_unassigned_pending_requests_in_same_state(self):
+        in_state = self.make_request(driver=self.other_driver, state="lAgOs")
+        self.make_request(driver=self.other_driver, state="Ogun")
+        self.make_request(driver=self.other_driver, manager=self.other_manager, state="Lagos")
+        self.make_request(driver=self.other_driver, mechanic=self.other_mechanic, state="Lagos")
+        self.make_request(driver=self.other_driver, state="Lagos", status="Accepted")
+        self.authenticate_as(self.manager_user)
+
+        response = self.client.get("/api/v1/manager/queue/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["count"], 1)
+        queued_request = response.data["results"][0]
+        self.assertEqual(queued_request["id"], in_state.pk)
+        self.assertEqual(queued_request["state"], "lAgOs")
+        self.assertNotIn("mobile", queued_request)
+        self.assertNotIn("cost", queued_request)
+        self.assertNotIn("driver", queued_request)
+
+    def test_manager_can_claim_and_assign_a_state_request_atomically(self):
+        self.mechanic.my_manager = self.manager
+        self.mechanic.save(update_fields=["my_manager"])
+        queue_request = self.make_request(driver=self.other_driver, state="lagos")
+        self.authenticate_as(self.manager_user)
+
+        response = self.client.post(
+            f"/api/v1/manager/queue/{queue_request.pk}/claim/",
+            {"mechanic_id": self.mechanic.pk},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], "Accepted")
+        queue_request.refresh_from_db()
+        self.assertEqual(queue_request.manager, self.manager)
+        self.assertEqual(queue_request.mechanic, self.mechanic)
+        self.assertEqual(queue_request.status, "Accepted")
+        self.assertEqual(queue_request.cost, 0)
+        self.assertEqual(queue_request.invoice, "Pending")
+        self.assertTrue(
+            ManagerNotification.objects.filter(
+                manager=self.manager,
+                message__contains=f"request #{queue_request.pk}",
+            ).exists()
+        )
+        self.assertTrue(
+            MechanicNotification.objects.filter(
+                mechanic=self.mechanic,
+                message__contains=f"request #{queue_request.pk}",
+            ).exists()
+        )
+        self.assertTrue(
+            DriverNotification.objects.filter(
+                driver=self.other_driver,
+                message__contains="assigned to a mechanic",
+            ).exists()
+        )
+
+    def test_manager_claim_rejects_wrong_state_and_non_team_mechanic(self):
+        self.authenticate_as(self.manager_user)
+        queue_request = self.make_request(driver=self.other_driver, state="Ogun")
+        wrong_state = self.client.post(
+            f"/api/v1/manager/queue/{queue_request.pk}/claim/",
+            {"mechanic_id": self.mechanic.pk},
+            format="json",
+        )
+        self.assertEqual(wrong_state.status_code, 404)
+
+        queue_request.state = "Lagos"
+        queue_request.save(update_fields=["state"])
+        not_on_team = self.client.post(
+            f"/api/v1/manager/queue/{queue_request.pk}/claim/",
+            {"mechanic_id": self.other_mechanic.pk},
+            format="json",
+        )
+        self.assertEqual(not_on_team.status_code, 404)
+        queue_request.refresh_from_db()
+        self.assertIsNone(queue_request.manager)
+        self.assertIsNone(queue_request.mechanic)
+        self.assertEqual(queue_request.status, "Pending")
+
+    def test_manager_and_mechanic_active_assignments_block_claims(self):
+        self.mechanic.my_manager = self.manager
+        self.mechanic.save(update_fields=["my_manager"])
+        queue_request = self.make_request(driver=self.other_driver, state="Lagos")
+        self.driver_request.status = "Accepted"
+        self.driver_request.save(update_fields=["status"])
+        self.authenticate_as(self.manager_user)
+
+        manager_busy = self.client.post(
+            f"/api/v1/manager/queue/{queue_request.pk}/claim/",
+            {"mechanic_id": self.mechanic.pk},
+            format="json",
+        )
+        self.assertEqual(manager_busy.status_code, 409)
+
+        self.driver_request.status = "Pending"
+        self.driver_request.save(update_fields=["status"])
+        self.make_request(
+            driver=self.other_driver,
+            manager=self.other_manager,
+            mechanic=self.mechanic,
+            state="Lagos",
+            status="Repairing",
+        )
+        mechanic_busy = self.client.post(
+            f"/api/v1/manager/queue/{queue_request.pk}/claim/",
+            {"mechanic_id": self.mechanic.pk},
+            format="json",
+        )
+        self.assertEqual(mechanic_busy.status_code, 409)
 
     def test_public_schema_is_limited_to_mobile_v1_paths(self):
         response = self.client.get("/api/v1/schema/")
@@ -379,11 +725,21 @@ class MobileApiTests(TestCase):
             "/auth/logout",
             "/me",
             "/requests",
+            "/manager/mechanics",
+            "/manager/queue",
             "/notifications",
         ):
             self.assertIn(path, paths)
 
         self.assertTrue(any(path.startswith("/requests/{") for path in paths))
+        self.assertIn("get", schema["paths"]["/manager/mechanics/"])
+        self.assertIn("get", schema["paths"]["/manager/queue/"])
+        self.assertIn("post", schema["paths"]["/manager/queue/{request_id}/claim/"])
+        self.assertIn("post", schema["paths"]["/requests/"])
+        self.assertIn(
+            "application/json",
+            schema["paths"]["/requests/"]["post"]["requestBody"]["content"],
+        )
         login_response = schema["paths"]["/auth/login/"]["post"]["responses"]["200"]
         self.assertIn("application/json", login_response["content"])
         self.assertIn(
