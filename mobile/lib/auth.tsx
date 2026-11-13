@@ -1,8 +1,9 @@
-import { createContext, useCallback, useContext, useMemo, type PropsWithChildren } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type PropsWithChildren } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
 import { getCurrentUser, signIn as signInRequest, signOut as signOutRequest } from "./api";
 import { clearStoredTokens, readStoredTokens } from "./token-storage";
+import { registerDevicePushToken } from "./push-notifications";
 import type { MobileUser, TokenPair } from "./types";
 
 interface AuthContextValue {
@@ -60,6 +61,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [mutateCache, mutateTokens]);
 
   const retrySession = useCallback(() => mutateUser(), [mutateUser]);
+  const pushRegistrationForUser = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      pushRegistrationForUser.current = null;
+      return;
+    }
+    if (pushRegistrationForUser.current === user.id) return;
+
+    pushRegistrationForUser.current = user.id;
+    void registerDevicePushToken().catch(() => {
+      pushRegistrationForUser.current = null;
+    });
+  }, [user]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

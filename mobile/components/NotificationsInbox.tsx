@@ -1,11 +1,18 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import useSWRInfinite from "swr/infinite";
 
 import { NotificationCard } from "./NotificationCard";
 import { PrimaryButton } from "./PrimaryButton";
 import { useAuth } from "../lib/auth";
-import { ApiError, getApiConfigurationIssue, getNotificationPage, isApiConfigured } from "../lib/api";
+import {
+  ApiError,
+  getApiConfigurationIssue,
+  getNotificationPage,
+  isApiConfigured,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "../lib/api";
 import { colors } from "../lib/theme";
 import type { NotificationPage } from "../lib/types";
 
@@ -27,6 +34,47 @@ export function NotificationsInbox() {
   const unreadCount = notifications.filter((notification) => !notification.is_read).length;
   const lastPage = data?.[data.length - 1];
   const configurationIssue = getApiConfigurationIssue();
+  const [pendingNotificationIds, setPendingNotificationIds] = useState<Set<number>>(() => new Set());
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
+
+  async function handleMarkRead(notificationId: number) {
+    setActionError(null);
+    setActionNotice(null);
+    setPendingNotificationIds((current) => new Set(current).add(notificationId));
+    try {
+      await markNotificationRead(notificationId);
+      await mutate();
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Could not update this notification.");
+    } finally {
+      setPendingNotificationIds((current) => {
+        const next = new Set(current);
+        next.delete(notificationId);
+        return next;
+      });
+    }
+  }
+
+  async function handleMarkAllRead() {
+    setActionError(null);
+    setActionNotice(null);
+    setIsMarkingAllRead(true);
+    try {
+      const result = await markAllNotificationsRead();
+      await mutate();
+      setActionNotice(
+        result.updated_count === 1
+          ? "Marked 1 notification as read."
+          : `Marked ${result.updated_count} notifications as read.`,
+      );
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Could not update notifications.");
+    } finally {
+      setIsMarkingAllRead(false);
+    }
+  }
 
   if (!user) return null;
 
@@ -56,8 +104,32 @@ export function NotificationsInbox() {
           </View>
         </View>
 
+        {notifications.length ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Mark all notifications as read"
+            accessibilityHint="Marks every unread notification on your account as read, including notifications not currently loaded."
+            accessibilityState={{ disabled: isMarkingAllRead || pendingNotificationIds.size > 0 }}
+            disabled={isMarkingAllRead || pendingNotificationIds.size > 0}
+            onPress={() => void handleMarkAllRead()}
+            style={({ pressed }) => [
+              styles.markAllButton,
+              (isMarkingAllRead || pendingNotificationIds.size > 0) && styles.disabledButton,
+              pressed && styles.pressedButton,
+            ]}
+          >
+            {isMarkingAllRead ? (
+              <ActivityIndicator color={colors.teal} size="small" />
+            ) : (
+              <Text style={styles.markAllButtonText}>Mark all as read</Text>
+            )}
+          </Pressable>
+        ) : null}
+        {actionNotice ? <Text accessibilityRole="alert" style={styles.actionNotice}>{actionNotice}</Text> : null}
+        {actionError ? <Text accessibilityRole="alert" style={styles.actionError}>{actionError}</Text> : null}
+
         <Text style={styles.readOnlyNote}>
-          The count covers loaded notifications. Viewing the inbox does not mark them as read.
+          The unread count covers loaded notifications. Marking all read applies to your entire inbox.
         </Text>
 
         {configurationIssue ? (
@@ -75,7 +147,12 @@ export function NotificationsInbox() {
         ) : notifications.length ? (
           <View style={styles.notificationList}>
             {notifications.map((notification) => (
-              <NotificationCard key={notification.id} notification={notification} />
+              <NotificationCard
+                key={notification.id}
+                notification={notification}
+                isUpdating={isMarkingAllRead || pendingNotificationIds.has(notification.id)}
+                onMarkRead={() => void handleMarkRead(notification.id)}
+              />
             ))}
             {lastPage?.next ? (
               <PrimaryButton
@@ -179,6 +256,39 @@ const styles = StyleSheet.create({
   },
   readOnlyNote: {
     color: colors.muted,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  markAllButton: {
+    alignSelf: "flex-start",
+    minHeight: 42,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 14,
+    backgroundColor: colors.paper,
+    borderWidth: 1,
+    borderColor: colors.teal,
+  },
+  disabledButton: {
+    opacity: 0.55,
+  },
+  pressedButton: {
+    opacity: 0.82,
+  },
+  markAllButtonText: {
+    color: colors.teal,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  actionNotice: {
+    color: colors.teal,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  actionError: {
+    color: colors.red,
     fontSize: 12,
     lineHeight: 18,
   },

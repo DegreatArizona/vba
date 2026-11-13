@@ -1,27 +1,57 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "../lib/theme";
 import type { MobileNotification } from "../lib/types";
 
-export function NotificationCard({ notification }: { notification: MobileNotification }) {
+export function NotificationCard({
+  notification,
+  isUpdating = false,
+  onMarkRead,
+}: {
+  notification: MobileNotification;
+  isUpdating?: boolean;
+  onMarkRead?: () => void;
+}) {
   const status = notification.is_read ? "Read" : "New";
   const timestamp = formatTimestamp(notification.timestamp);
-
-  return (
-    <View
-      accessible
-      accessibilityLabel={`${status} notification. ${notification.message}. ${timestamp}.`}
-      style={[styles.card, !notification.is_read && styles.unreadCard]}
-    >
+  const cardContent = (
+    <>
       <View style={styles.statusColumn}>
         <View style={[styles.statusDot, !notification.is_read && styles.statusDotUnread]} />
-        <Text style={[styles.statusLabel, !notification.is_read && styles.statusLabelUnread]}>{status}</Text>
+        <Text style={[styles.statusLabel, !notification.is_read && styles.statusLabelUnread]}>
+          {isUpdating ? "Saving" : status}
+        </Text>
       </View>
       <View style={styles.copy}>
         <Text style={styles.message}>{notification.message}</Text>
         <Text style={styles.timestamp}>{timestamp}</Text>
+        {!notification.is_read ? <Text style={styles.actionHint}>Tap to mark as read</Text> : null}
       </View>
-    </View>
+    </>
+  );
+  const accessibilityLabel = notification.is_read
+    ? `Read notification. ${notification.message}. ${timestamp}.`
+    : `Mark notification as read. ${notification.message}. ${timestamp}.`;
+
+  if (notification.is_read) {
+    return (
+      <View accessible accessibilityLabel={accessibilityLabel} style={styles.card}>
+        {cardContent}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled: isUpdating }}
+      disabled={isUpdating}
+      onPress={onMarkRead}
+      style={({ pressed }) => [styles.card, styles.unreadCard, pressed && styles.pressedCard]}
+    >
+      {cardContent}
+    </Pressable>
   );
 }
 
@@ -51,6 +81,9 @@ const styles = StyleSheet.create({
   unreadCard: {
     backgroundColor: colors.tealSoft,
     borderColor: "#C8E7DF",
+  },
+  pressedCard: {
+    opacity: 0.82,
   },
   statusColumn: {
     minWidth: 40,
@@ -88,5 +121,10 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 11,
     fontWeight: "600",
+  },
+  actionHint: {
+    color: colors.teal,
+    fontSize: 11,
+    fontWeight: "700",
   },
 });

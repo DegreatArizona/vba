@@ -150,9 +150,19 @@ export function SignInScreen() {
             style={compact ? styles.submitCompact : styles.submit}
           />
 
-          <Text style={[styles.footerNote, compact && styles.footerNoteCompact]}>
-            Account registration is managed by Auto Aid. Sign in to create requests and follow assigned work.
-          </Text>
+          <View style={styles.footerLinks}>
+            <Text style={[styles.footerNote, compact && styles.footerNoteCompact]}>New to Auto Aid?</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push("/register")}
+              style={styles.footerLinkButton}
+            >
+              <Text style={styles.footerLink}>Create a driver or mechanic account</Text>
+            </Pressable>
+            <Text style={[styles.footerNote, compact && styles.footerNoteCompact]}>
+              Manager accounts require an Auto Aid invitation.
+            </Text>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </ScreenFrame>
@@ -328,10 +338,25 @@ const styles = StyleSheet.create({
   submit: {
     marginTop: 2,
   },
+  footerLinks: {
+    alignItems: "center",
+    gap: 5,
+  },
   footerNote: {
     color: colors.muted,
     fontSize: 12,
     lineHeight: 18,
+    textAlign: "center",
+  },
+  footerLinkButton: {
+    minHeight: 40,
+    justifyContent: "center",
+    paddingHorizontal: 8,
+  },
+  footerLink: {
+    color: colors.teal,
+    fontSize: 13,
+    fontWeight: "700",
     textAlign: "center",
   },
   contentCompact: {

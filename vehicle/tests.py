@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core import mail
 from django.test import TestCase, override_settings
 from unittest.mock import patch
 from rest_framework.test import APIClient
@@ -7,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from vehicle.models import (
     Driver,
     DriverNotification,
+    MobileDeviceToken,
     Manager,
     ManagerNotification,
     Mechanic,
@@ -95,6 +97,16 @@ class MobileApiTests(TestCase):
         self.assertEqual(self.client.get("/api/v1/me/").status_code, 401)
         self.assertEqual(self.client.get("/api/v1/requests/").status_code, 401)
         self.assertEqual(self.client.get("/api/v1/notifications/").status_code, 401)
+        self.assertEqual(self.client.post("/api/v1/notifications/read-all/").status_code, 401)
+        self.assertEqual(self.client.post("/api/v1/notifications/1/read/").status_code, 401)
+        self.assertEqual(
+            self.client.post(
+                "/api/v1/push-tokens/register/",
+                {"token": "ExpoPushToken[test-device]", "platform": "ios"},
+                format="json",
+            ).status_code,
+            401,
+        )
         self.assertEqual(self.client.get("/api/v1/manager/mechanics/").status_code, 401)
         self.assertEqual(self.client.get("/api/v1/manager/queue/").status_code, 401)
         self.assertEqual(
@@ -139,6 +151,121 @@ class MobileApiTests(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 401)
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        SITE_URL="https://autoaid.example.test",
+    )
+    def test_driver_registration_creates_unverified_account_and_sends_verification_email(self):
+        response = self.client.post(
+            "/api/v1/auth/register/",
+            {
+                "role": "driver",
+                "first_name": "New",
+                "last_name": "Driver",
+                "username": "new-driver",
+                "email": "new-driver@example.test",
+                "password": "StrongPassword123!",
+                "password_confirm": "StrongPassword123!",
+                "mobile": "+2348000000099",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["role"], "driver")
+        self.assertTrue(response.data["verification_required"])
+        self.assertNotIn("access", response.data)
+        self.assertNotIn("refresh", response.data)
+        user = User.objects.get(username="new-driver")
+        driver = Driver.objects.get(user=user)
+        self.assertTrue(user.check_password("StrongPassword123!"))
+        self.assertFalse(driver.is_email_verified)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("https://autoaid.example.test/verify-email/", mail.outbox[0].alternatives[0][0])
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_mechanic_registration_requires_service_area_and_starts_pending(self):
+        response = self.client.post(
+            "/api/v1/auth/register/",
+            {
+                "role": "mechanic",
+                "first_name": "New",
+                "last_name": "Mechanic",
+                "username": "new-mechanic",
+                "email": "new-mechanic@example.test",
+                "password": "StrongPassword123!",
+                "password_confirm": "StrongPassword123!",
+                "mobile": "+2348000000088",
+                "state": "Lagos",
+                "local_government": "Ikeja",
+                "services": ["Tire Repair", "Engine Repair"],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        mechanic = Mechanic.objects.get(user__username="new-mechanic")
+        self.assertFalse(mechanic.status)
+        self.assertFalse(mechanic.is_email_verified)
+        self.assertEqual(mechanic.service, "Tire Repair, Engine Repair")
+
+        invalid_response = self.client.post(
+            "/api/v1/auth/register/",
+            {
+                "role": "mechanic",
+                "first_name": "Missing",
+                "last_name": "Area",
+                "username": "missing-area",
+                "email": "missing-area@example.test",
+                "password": "StrongPassword123!",
+                "password_confirm": "StrongPassword123!",
+                "mobile": "+2348000000077",
+                "services": ["Tire Repair"],
+            },
+            format="json",
+        )
+        self.assertEqual(invalid_response.status_code, 400)
+        self.assertFalse(User.objects.filter(username="missing-area").exists())
+
+    def test_mobile_registration_does_not_allow_manager_accounts(self):
+        response = self.client.post(
+            "/api/v1/auth/register/",
+            {
+                "role": "manager",
+                "first_name": "New",
+                "last_name": "Manager",
+                "username": "new-manager",
+                "email": "new-manager@example.test",
+                "password": "StrongPassword123!",
+                "password_confirm": "StrongPassword123!",
+                "mobile": "+2348000000066",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(User.objects.filter(username="new-manager").exists())
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        SITE_URL="https://autoaid.example.test",
+    )
+    def test_resend_verification_uses_a_generic_response_for_existing_and_unknown_email(self):
+        existing_response = self.client.post(
+            "/api/v1/auth/resend-verification/",
+            {"email": self.other_driver_user.email},
+            format="json",
+        )
+        unknown_response = self.client.post(
+            "/api/v1/auth/resend-verification/",
+            {"email": "not-registered@example.test"},
+            format="json",
+        )
+
+        self.assertEqual(existing_response.status_code, 202)
+        self.assertEqual(unknown_response.status_code, 202)
+        self.assertEqual(existing_response.data, unknown_response.data)
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_profile_response_does_not_expose_banking_fields(self):
         self.authenticate_as(self.mechanic_user)
@@ -251,8 +378,14 @@ class MobileApiTests(TestCase):
         self.authenticate_as(staff_user)
 
         response = self.client.get("/api/v1/notifications/")
+        push_response = self.client.post(
+            "/api/v1/push-tokens/register/",
+            {"token": "ExpoPushToken[staff-device]", "platform": "ios"},
+            format="json",
+        )
 
         self.assertEqual(response.status_code, 403)
+        self.assertEqual(push_response.status_code, 403)
 
     def test_notification_list_does_not_support_writes(self):
         notification = DriverNotification.objects.create(driver=self.driver, message="Unread update")
@@ -273,6 +406,55 @@ class MobileApiTests(TestCase):
         self.assertEqual(create_response.status_code, 405)
         self.assertEqual(update_response.status_code, 405)
         self.assertFalse(notification.is_read)
+
+    def test_users_can_mark_only_their_own_notifications_as_read(self):
+        own = DriverNotification.objects.create(driver=self.driver, message="Read this update")
+        other = DriverNotification.objects.create(driver=self.other_driver, message="Private update")
+        self.authenticate_as(self.driver_user)
+
+        response = self.client.post(f"/api/v1/notifications/{own.pk}/read/", format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["is_read"])
+
+        response = self.client.post(f"/api/v1/notifications/{other.pk}/read/", format="json")
+        other.refresh_from_db()
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(other.is_read)
+
+    def test_all_mobile_roles_can_mark_their_own_notifications_as_read(self):
+        notifications = (
+            (self.driver_user, DriverNotification.objects.create(driver=self.driver, message="Driver update")),
+            (self.mechanic_user, MechanicNotification.objects.create(mechanic=self.mechanic, message="Mechanic update")),
+            (self.manager_user, ManagerNotification.objects.create(manager=self.manager, message="Manager update")),
+        )
+
+        for user, notification in notifications:
+            with self.subTest(role=user.username):
+                self.authenticate_as(user)
+                response = self.client.post(f"/api/v1/notifications/{notification.pk}/read/", format="json")
+                notification.refresh_from_db()
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(notification.is_read)
+
+    def test_mark_all_notifications_is_scoped_to_the_current_profile(self):
+        own_first = DriverNotification.objects.create(driver=self.driver, message="First update")
+        own_second = DriverNotification.objects.create(driver=self.driver, message="Second update")
+        other = DriverNotification.objects.create(driver=self.other_driver, message="Private update")
+        self.authenticate_as(self.driver_user)
+
+        response = self.client.post("/api/v1/notifications/read-all/", format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, {"updated_count": 2})
+
+        own_first.refresh_from_db()
+        own_second.refresh_from_db()
+        other.refresh_from_db()
+        self.assertTrue(own_first.is_read)
+        self.assertTrue(own_second.is_read)
+        self.assertFalse(other.is_read)
+
+        repeated_response = self.client.post("/api/v1/notifications/read-all/", format="json")
+        self.assertEqual(repeated_response.data, {"updated_count": 0})
 
     def test_driver_can_retrieve_own_request(self):
         self.authenticate_as(self.driver_user)
@@ -311,6 +493,41 @@ class MobileApiTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
+    def test_push_token_registration_is_idempotent_and_rotates_previous_token(self):
+        self.authenticate_as(self.driver_user)
+        first_response = self.client.post(
+            "/api/v1/push-tokens/register/",
+            {"token": "ExpoPushToken[first-device-token]", "platform": "ios"},
+            format="json",
+        )
+        self.assertEqual(first_response.status_code, 200)
+        first_token = MobileDeviceToken.objects.get(expo_push_token="ExpoPushToken[first-device-token]")
+
+        repeated_response = self.client.post(
+            "/api/v1/push-tokens/register/",
+            {"token": first_token.expo_push_token, "platform": "ios"},
+            format="json",
+        )
+        self.assertEqual(repeated_response.status_code, 200)
+        self.assertEqual(MobileDeviceToken.objects.count(), 1)
+
+        rotated_response = self.client.post(
+            "/api/v1/push-tokens/register/",
+            {
+                "token": "ExpoPushToken[rotated-device-token]",
+                "platform": "ios",
+                "previous_token": first_token.expo_push_token,
+            },
+            format="json",
+        )
+        first_token.refresh_from_db()
+        rotated_token = MobileDeviceToken.objects.get(expo_push_token="ExpoPushToken[rotated-device-token]")
+
+        self.assertEqual(rotated_response.status_code, 200)
+        self.assertFalse(first_token.is_active)
+        self.assertTrue(rotated_token.is_active)
+        self.assertEqual(MobileDeviceToken.objects.count(), 2)
+
     def test_refresh_rotates_and_logout_blacklists_refresh_token(self):
         login = self.client.post(
             "/api/v1/auth/login/",
@@ -319,6 +536,11 @@ class MobileApiTests(TestCase):
         )
         self.assertEqual(login.status_code, 200)
         original_refresh = login.data["refresh"]
+        push_device = MobileDeviceToken.objects.create(
+            user=self.driver_user,
+            expo_push_token="ExpoPushToken[driver-device]",
+            platform="ios",
+        )
 
         refreshed = self.client.post(
             "/api/v1/auth/refresh/", {"refresh": original_refresh}, format="json"
@@ -330,10 +552,15 @@ class MobileApiTests(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refreshed.data['access']}")
         logout = self.client.post(
             "/api/v1/auth/logout/",
-            {"refresh": refreshed.data["refresh"]},
+            {
+                "refresh": refreshed.data["refresh"],
+                "push_token": push_device.expo_push_token,
+            },
             format="json",
         )
         self.assertEqual(logout.status_code, 204)
+        push_device.refresh_from_db()
+        self.assertFalse(push_device.is_active)
 
         rejected = self.client.post(
             "/api/v1/auth/refresh/",

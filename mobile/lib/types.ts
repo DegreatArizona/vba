@@ -1,11 +1,42 @@
 export type UserRole = "driver" | "mechanic" | "manager";
+export type RegistrationRole = Exclude<UserRole, "manager">;
+export type MechanicService =
+  | "Tire Repair"
+  | "Towing Service"
+  | "Battery Jumpstart"
+  | "Electrical Issues"
+  | "Engine Repair"
+  | "Bodywork/Collision Repair"
+  | "Other Repair Service"
+  | "General Mechanics/All Services";
 
-export interface TokenPair {
-  access: string;
-  refresh: string;
+export interface MobileRegistrationInput {
+  role: RegistrationRole;
+  first_name: string;
+  last_name: string;
+  username: string;
+  email: string;
+  password: string;
+  password_confirm: string;
+  mobile: string;
+  address?: string;
+  license_no?: string;
+  vehicle_model?: string;
+  state?: string;
+  local_government?: string;
+  union_name?: string;
+  union_location?: string;
+  services?: MechanicService[];
+}
+
+export interface MobileRegistrationResponse {
+  detail: string;
+  role: RegistrationRole;
+  verification_required: boolean;
 }
 
 export interface MobileUser {
+
   id: number;
   username: string;
   email: string;
@@ -14,6 +45,11 @@ export interface MobileUser {
   role: UserRole;
   is_email_verified: boolean;
   is_approved: boolean;
+}
+
+export interface TokenPair {
+  access: string;
+  refresh: string;
 }
 
 export interface LoginResponse extends TokenPair {

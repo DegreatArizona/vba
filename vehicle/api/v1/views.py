@@ -1,4 +1,10 @@
+import logging
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
@@ -21,22 +27,32 @@ from vehicle.request_services import (
     perform_mechanic_request_action,
 )
 from vehicle.models import (
+    Driver,
     DriverNotification,
     ManagerNotification,
     Mechanic,
     MechanicNotification,
+    MobileDeviceToken,
     Request,
 )
+from vehicle.utils import generate_token, send_html_email
 from .serializers import (
     ManagerMechanicPageSerializer,
     ManagerMechanicSummarySerializer,
     ManagerQueueRequestSerializer,
     ManagerRequestClaimSerializer,
     MechanicRequestActionSerializer,
+    MobileDeviceTokenRegistrationSerializer,
+    MobileDeviceTokenResponseSerializer,
     MobileLogoutSerializer,
+    MobileRegistrationResponseSerializer,
+    MobileRegistrationSerializer,
+    MobileResendVerificationResponseSerializer,
+    MobileResendVerificationSerializer,
     MobileTokenObtainPairSerializer,
     MobileTokenResponseSerializer,
     MobileUserSerializer,
+    NotificationMarkAllReadResponseSerializer,
     NotificationReadSerializer,
     RequestCreateSerializer,
     RequestReadSerializer,
@@ -53,6 +69,93 @@ class MobileLoginView(TokenObtainPairView):
     serializer_class = MobileTokenObtainPairSerializer
 
 
+User = get_user_model()
+logger = logging.getLogger(__name__)
+
+
+def send_mobile_verification_email(user):
+    token = generate_token(user.email)
+    verification_link = f"{settings.SITE_URL}/verify-email/{token}"
+    send_html_email(
+        subject="Verify your Auto Aid account",
+        template_name="mails/verify.html",
+        context={
+            "user": user,
+            "message1": "Verify Your Email",
+            "message2": "Click the link below to verify your email:",
+            "link": verification_link,
+        },
+        recipient_list=[user.email],
+    )
+
+
+class MobileRegistrationView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    throttle_classes = (ScopedRateThrottle,)
+    throttle_scope = "auth_register"
+
+    @extend_schema(
+        request=MobileRegistrationSerializer,
+        responses={201: MobileRegistrationResponseSerializer},
+        tags=["Auth"],
+    )
+    def post(self, request):
+        serializer = MobileRegistrationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        role = serializer.validated_data["role"]
+        try:
+            user = serializer.save()
+        except IntegrityError:
+            return Response(
+                {"detail": "This username or email is already in use."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            send_mobile_verification_email(user)
+        except Exception:
+            logger.exception("Mobile account verification email could not be sent.")
+
+        return Response(
+            {
+                "detail": "Account created. Verify your email before using service features. If the email does not arrive, request another link.",
+                "role": role,
+                "verification_required": True,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class MobileResendVerificationView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    throttle_classes = (ScopedRateThrottle,)
+    throttle_scope = "auth_resend"
+
+    @extend_schema(
+        request=MobileResendVerificationSerializer,
+        responses={202: MobileResendVerificationResponseSerializer},
+        tags=["Auth"],
+    )
+    def post(self, request):
+        serializer = MobileResendVerificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.filter(email__iexact=serializer.validated_data["email"]).first()
+        if user:
+            driver = Driver.objects.filter(user=user).first()
+            mechanic = Mechanic.objects.filter(user=user).first()
+            profiles = [profile for profile in (driver, mechanic) if profile is not None]
+            if len(profiles) == 1 and not profiles[0].is_email_verified:
+                try:
+                    send_mobile_verification_email(user)
+                except Exception:
+                    logger.exception("Mobile account verification email could not be resent.")
+
+        return Response(
+            {"detail": "If an unverified driver or mechanic account exists for that email, verification instructions will be sent."},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+
 class MobileTokenRefreshView(TokenRefreshView):
     permission_classes = (permissions.AllowAny,)
     throttle_classes = (ScopedRateThrottle,)
@@ -64,12 +167,9 @@ class MobileLogoutView(APIView):
 
     @extend_schema(request=MobileLogoutSerializer, responses={204: None})
     def post(self, request):
-        refresh_token = request.data.get("refresh")
-        if not isinstance(refresh_token, str) or not refresh_token:
-            return Response(
-                {"detail": "A refresh token is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        serializer = MobileLogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        refresh_token = serializer.validated_data["refresh"]
 
         try:
             token = RefreshToken(refresh_token)
@@ -78,7 +178,15 @@ class MobileLogoutView(APIView):
                     {"detail": "The refresh token does not belong to this account."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            token.blacklist()
+            with transaction.atomic():
+                token.blacklist()
+                push_token = serializer.validated_data.get("push_token")
+                if push_token:
+                    MobileDeviceToken.objects.filter(
+                        user=request.user,
+                        expo_push_token=push_token,
+                        is_active=True,
+                    ).update(is_active=False, updated_at=timezone.now())
         except TokenError:
             return Response(
                 {"detail": "The refresh token is invalid or expired."},
@@ -86,6 +194,45 @@ class MobileLogoutView(APIView):
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MobileDeviceTokenRegistrationView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    throttle_classes = (ScopedRateThrottle,)
+    throttle_scope = "push_token_register"
+
+    @extend_schema(
+        request=MobileDeviceTokenRegistrationSerializer,
+        responses={200: MobileDeviceTokenResponseSerializer},
+        tags=["Push notifications"],
+    )
+    def post(self, request):
+        get_mobile_profile(request.user)
+        serializer = MobileDeviceTokenRegistrationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data["token"]
+        previous_token = serializer.validated_data.get("previous_token")
+        now = timezone.now()
+
+        with transaction.atomic():
+            if previous_token and previous_token != token:
+                MobileDeviceToken.objects.filter(
+                    user=request.user,
+                    expo_push_token=previous_token,
+                    is_active=True,
+                ).update(is_active=False, updated_at=now)
+
+            MobileDeviceToken.objects.update_or_create(
+                expo_push_token=token,
+                defaults={
+                    "user": request.user,
+                    "platform": serializer.validated_data["platform"],
+                    "is_active": True,
+                    "last_registered_at": now,
+                },
+            )
+
+        return Response({"registered": True}, status=status.HTTP_200_OK)
 
 
 class MobileProfileView(APIView):
@@ -96,20 +243,56 @@ class MobileProfileView(APIView):
         return Response(MobileUserSerializer(request.user).data)
 
 
+def get_mobile_notification_queryset(user):
+    role, profile = get_mobile_profile(user)
+    if role == "driver":
+        notifications = DriverNotification.objects.filter(driver=profile)
+    elif role == "mechanic":
+        notifications = MechanicNotification.objects.filter(mechanic=profile)
+    else:
+        notifications = ManagerNotification.objects.filter(manager=profile)
+    return notifications.order_by("-timestamp", "-pk")
+
+
 @method_decorator(never_cache, name="dispatch")
 class MobileNotificationListView(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = NotificationReadSerializer
 
     def get_queryset(self):
-        role, profile = get_mobile_profile(self.request.user)
-        if role == "driver":
-            notifications = DriverNotification.objects.filter(driver=profile)
-        elif role == "mechanic":
-            notifications = MechanicNotification.objects.filter(mechanic=profile)
-        else:
-            notifications = ManagerNotification.objects.filter(manager=profile)
-        return notifications.order_by("-timestamp", "-pk")
+        return get_mobile_notification_queryset(self.request.user)
+
+
+@method_decorator(never_cache, name="dispatch")
+class MobileNotificationReadView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = NotificationReadSerializer
+
+    @extend_schema(request=None, responses=NotificationReadSerializer, tags=["Notifications"])
+    def post(self, request, notification_id):
+        notification = get_mobile_notification_queryset(request.user).filter(pk=notification_id).first()
+        if notification is None:
+            raise NotFound("This notification is unavailable.")
+
+        if not notification.is_read:
+            notification.is_read = True
+            notification.save(update_fields=["is_read"])
+        return Response(NotificationReadSerializer(notification).data, status=status.HTTP_200_OK)
+
+
+@method_decorator(never_cache, name="dispatch")
+class MobileNotificationMarkAllReadView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = NotificationMarkAllReadResponseSerializer
+
+    @extend_schema(
+        request=None,
+        responses=NotificationMarkAllReadResponseSerializer,
+        tags=["Notifications"],
+    )
+    def post(self, request):
+        updated_count = get_mobile_notification_queryset(request.user).filter(is_read=False).update(is_read=True)
+        return Response({"updated_count": updated_count}, status=status.HTTP_200_OK)
 
 
 class MobileRequestScopeMixin:
