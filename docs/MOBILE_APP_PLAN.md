@@ -1,13 +1,13 @@
 # Mobile App Plan
 
-**Status:** The native client in `mobile/` uses Expo Router for username/password sign-in, role-aware request lists, request details, a driver request-entry flow, notification inbox, and profile views for Driver, Mechanic, and Manager. Native tokens use SecureStore with refresh/logout; the app includes approval, verification, loading, empty, and error states. Driver request creation uses a verified-driver API with server-owned status and pricing; mechanics can accept, start, and complete assigned work. Managers have a scoped team view and a state-matched queue where they can claim a pending request and assign it atomically to an eligible team mechanic. Payments, location tracking, notification mutations, and other writes remain staged. The client is native-first and does not wrap the website in a WebView.
+**Status:** The native client in `mobile/` uses Expo Router for username/password sign-in, Driver/Mechanic account registration with email verification, role-aware request lists, request details, driver request entry, notification inbox, and profile views for Driver, Mechanic, and Manager. Native tokens use SecureStore with refresh/logout; the app includes approval, verification, loading, empty, and error states. Driver request creation uses a verified-driver API with server-owned status and pricing; mechanics can accept, start, and complete assigned work. Managers have a scoped team view and a state-matched queue where they can claim a pending request and assign it atomically to an eligible team mechanic. Notifications support owner-scoped mark-read and mark-all-read actions. Payments, location tracking, push-token registration, and other writes remain staged. The client is native-first and does not wrap the website in a WebView.
 
 ## Current first slice
 
 - `mobile/` is a standalone Expo Router app; its routes live in `src/app/` and consume the existing `/api/v1/` endpoints.
 - Configure `EXPO_PUBLIC_API_BASE_URL` with the API origin shown in `.env.example`. Production builds reject non-HTTPS API origins.
 - iOS and Android store access/refresh tokens in Expo SecureStore. The web preview keeps tokens in memory only and does not persist them across reloads.
-- The API supports sign-in, profile and request reads, driver request creation, assigned-mechanic work transitions, manager-scoped team reads, a state-scoped pending queue, atomic manager claim-and-assign, refresh, and logout. Driver entry, mechanic actions, and manager dispatch are connected to authenticated APIs; registration, payments, location tracking, and push notifications remain staged.
+- The API supports sign-in, Driver/Mechanic registration and verification resend, profile and request reads, driver request creation, assigned-mechanic work transitions, manager-scoped team reads, a state-scoped pending queue, atomic manager claim-and-assign, notification read actions, refresh, and logout. Payments, location tracking, and push-token registration remain staged.
 
 ## Product shape
 

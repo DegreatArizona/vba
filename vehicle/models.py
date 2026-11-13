@@ -192,6 +192,25 @@ class DriverNotification(models.Model):
     def __str__(self):
         return f"{self.driver.get_name} - {self.message[:50]} - {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
 
+
+class MobileDeviceToken(models.Model):
+    PLATFORM_CHOICES = (("ios", "iOS"), ("android", "Android"))
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mobile_device_tokens")
+    expo_push_token = models.CharField(max_length=255, unique=True)
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_registered_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "is_active"], name="mobile_token_user_active_idx")]
+
+    def __str__(self):
+        return f"{self.user_id} - {self.platform} - {'active' if self.is_active else 'inactive'}"
+
+
 class DriverFundHistory(models.Model):
     narration = models.TextField(max_length=500, blank=True)
     driver = models.ForeignKey('Driver', on_delete=models.CASCADE, null=True, blank=True)

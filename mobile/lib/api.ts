@@ -1,5 +1,20 @@
 import { clearStoredTokens, readStoredTokens, writeStoredTokens } from "./token-storage";
-import type { LoginResponse, ManagerMechanicPage, ManagerQueuePage, MechanicRequestAction, MobileUser, NotificationPage, RequestCreateInput, RequestPage, ServiceRequest, TokenPair } from "./types";
+import { deleteStoredPushToken, readStoredPushToken } from "./push-token-storage";
+import type {
+  LoginResponse,
+  ManagerMechanicPage,
+  ManagerQueuePage,
+  MechanicRequestAction,
+  MobileNotification,
+  MobileRegistrationInput,
+  MobileRegistrationResponse,
+  MobileUser,
+  NotificationPage,
+  RequestCreateInput,
+  RequestPage,
+  ServiceRequest,
+  TokenPair,
+} from "./types";
 
 const configuredOrigin = (process.env.EXPO_PUBLIC_API_BASE_URL ?? "").trim().replace(/\/+$/, "");
 
@@ -70,6 +85,7 @@ function responseMessage(payload: unknown, fallback: string): string {
       if (typeof detail === "string") return detail;
     }
     for (const [field, errors] of Object.entries(payload)) {
+      if (typeof errors === "string") return `${field}: ${errors}`;
       if (Array.isArray(errors)) {
         const message = errors.find((item): item is string => typeof item === "string");
         if (message) return `${field}: ${message}`;
@@ -171,6 +187,24 @@ async function performRequest<T>(
   return payload as T;
 }
 
+export function registerAccount(input: MobileRegistrationInput): Promise<MobileRegistrationResponse> {
+  return performRequest<MobileRegistrationResponse>(
+    "/api/v1/auth/register/",
+    { method: "POST", body: JSON.stringify(input) },
+    false,
+    false,
+  );
+}
+
+export function resendVerificationEmail(email: string): Promise<{ detail: string }> {
+  return performRequest<{ detail: string }>(
+    "/api/v1/auth/resend-verification/",
+    { method: "POST", body: JSON.stringify({ email }) },
+    false,
+    false,
+  );
+}
+
 export async function signIn(username: string, password: string): Promise<MobileUser> {
   const result = await performRequest<LoginResponse>(
     "/api/v1/auth/login/",
@@ -187,6 +221,19 @@ export async function signIn(username: string, password: string): Promise<Mobile
   return result.user;
 }
 
+export function registerExpoPushToken(input: {
+  token: string;
+  platform: "ios" | "android";
+  previous_token?: string;
+}): Promise<{ registered: boolean }> {
+  return performRequest<{ registered: boolean }>(
+    "/api/v1/push-tokens/register/",
+    { method: "POST", body: JSON.stringify(input) },
+    true,
+    true,
+  );
+}
+
 export function getCurrentUser(): Promise<MobileUser> {
   return performRequest<MobileUser>("/api/v1/me/", {}, true, true);
 }
@@ -197,6 +244,24 @@ export function getRequestPage(path: string): Promise<RequestPage> {
 
 export function getNotificationPage(path: string): Promise<NotificationPage> {
   return performRequest<NotificationPage>(path, {}, true, true);
+}
+
+export function markNotificationRead(notificationId: number): Promise<MobileNotification> {
+  return performRequest<MobileNotification>(
+    `/api/v1/notifications/${notificationId}/read/`,
+    { method: "POST" },
+    true,
+    true,
+  );
+}
+
+export function markAllNotificationsRead(): Promise<{ updated_count: number }> {
+  return performRequest<{ updated_count: number }>(
+    "/api/v1/notifications/read-all/",
+    { method: "POST" },
+    true,
+    true,
+  );
 }
 
 export function getManagerMechanicPage(page: number, pageSize = 20): Promise<ManagerMechanicPage> {
@@ -246,7 +311,7 @@ export function performMechanicRequestAction(
   );
 }
 
-async function sendLogout(tokens: TokenPair): Promise<Response> {
+async function sendLogout(tokens: TokenPair, pushToken: string | null): Promise<Response> {
   return fetch(apiUrl("/api/v1/auth/logout/"), {
     method: "POST",
     headers: {
@@ -254,18 +319,22 @@ async function sendLogout(tokens: TokenPair): Promise<Response> {
       "Content-Type": "application/json",
       Authorization: `Bearer ${tokens.access}`,
     },
-    body: JSON.stringify({ refresh: tokens.refresh }),
+    body: JSON.stringify({
+      refresh: tokens.refresh,
+      ...(pushToken ? { push_token: pushToken } : {}),
+    }),
   });
 }
 
 export async function signOut(): Promise<void> {
   try {
     let tokens = await readStoredTokens();
+    const pushToken = await readStoredPushToken();
     if (!tokens || !isApiConfigured()) return;
 
     let response: Response;
     try {
-      response = await sendLogout(tokens);
+      response = await sendLogout(tokens, pushToken);
     } catch {
       return;
     }
@@ -274,12 +343,14 @@ export async function signOut(): Promise<void> {
       tokens = await readStoredTokens();
       if (tokens) {
         try {
-          await sendLogout(tokens);
+          response = await sendLogout(tokens, pushToken);
         } catch {
           return;
         }
       }
     }
+
+    if (response.ok) await deleteStoredPushToken();
   } finally {
     await clearStoredTokens();
   }
